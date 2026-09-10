@@ -1,0 +1,45 @@
+name = "HJO"
+defaultTargets = ["HJO"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+# Mathlib's standard linter set. The `weak.` prefix means Lake will not fail if a
+# revision does not define the option. Enabling it here is what makes the
+# mechanically-enforceable half of the style rules enforced from now on.
+weak.linter.mathlibStandardSet = true
+
+# The Mathlib pin matches `lean-toolchain` (leanprover/lean4:v4.34.0-rc1). Bump the two in ONE
+# commit, then regenerate `lake-manifest.json`.
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "de5ce8a9a66a4aa68a9bdbb35b63a06d34d9ca11"
+
+# The q-series substrate this project builds on: q-Pochhammer, Gaussian
+# binomials, partitions and formal q-series. Public, so an anonymous https clone
+# works. Its own Mathlib pin is the `rev` above -- QSeriesLib tags track the
+# toolchain, so bump this tag, `lean-toolchain` and the Mathlib rev TOGETHER.
+[[require]]
+name = "QSeriesLib"
+git = "https://github.com/AxiomMath/QSeriesLib.git"
+rev = "v4.34.0-rc1"
+
+[[lean_lib]]
+name = "HJO"
+
+# The comparator pair. Deliberately NOT in defaultTargets: `Challenge` carries a
+# permanent `sorry` (its statements are the artifact), and `lake lint` derives its
+# scope from the default targets. The comparator builds both modules itself.
+[[lean_lib]]
+name = "Challenge"
+# No copyright header, on purpose: this file follows the challenge template, which is
+# title-plus-a-sentence and nothing else. The header linter would otherwise report
+# "Copyright too short!" forever.
+leanOptions = { weak.linter.style.header = false }
+
+[[lean_lib]]
+name = "Solution"

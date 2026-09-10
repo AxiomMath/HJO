@@ -1,0 +1,17 @@
+{
+    "challenge_module": "Challenge.Basic",
+    "solution_module": "Solution.Basic",
+    "theorem_names": [
+        "HJO.Cylindric.summable_boundedGF",
+        "HJO.Cylindric.summable_unboundedGF",
+        "HJO.Finite.finite_index",
+        "HJO.Challenge.thm_finite",
+        "HJO.Challenge.thm_main"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ],
+    "enable_nanoda": true
+}

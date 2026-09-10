@@ -1,0 +1,19 @@
+name: Lean
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Builds `defaultTargets`, i.e. the `HJO` library.
+      - uses: leanprover/lean-action@v1
+      # `Challenge` and `Solution` are outside `defaultTargets` on purpose, so the step above
+      # does not reach them. They are the statements this repository is judged on, so they are
+      # typechecked here explicitly. `Challenge` prints one `declaration uses 'sorry'` per
+      # objective: that is the file working, not a failure.
+      - run: lake build Challenge Solution
