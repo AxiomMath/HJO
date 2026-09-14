@@ -506,7 +506,6 @@ theorem phiReg_elemSymm_eq_sum_area {N : ℕ} {q u : R} (hq : IsUnit (1 - q)) (h
     (hinj : Function.Injective (algebraMap R L)) (sp : R →+* F)
     (hsp : sp u = 1) {Θ : Lambda L →ₐ[L] Module.End L (Lambda L)}
     (hΘ : IsSlopeHom a b (algebraMap R L q) (algebraMap R L u) Θ) (shuffle : External.Shuffle L)
-    (epsilonGessel : External.EpsilonGessel L) (creationExpansion : External.CreationExpansion L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![algebraMap R L q, algebraMap R L u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L)
@@ -514,13 +513,13 @@ theorem phiReg_elemSymm_eq_sum_area {N : ℕ} {q u : R} (hq : IsUnit (1 - q)) (h
     phiReg b sp Θ (elemSymm R N) =
       ∑ y ∈ (univ : Finset (Paths.Heights a b N)) with Paths.IsBelowDiagonal y,
         sp q ^ Paths.area y := by
-  have hgs : ThetaSymmetry.GesselSelection L := epsilonGessel
+  have hgs : ThetaSymmetry.GesselSelection L := ExternalDischarged.epsilonGessel L
   obtain ⟨hval, hswap⟩ := ThetaSymmetry.signExtract_elemSymm_isPoly_and_swap
     (shuffle a b hab ha hb (algebraMap R L q) (algebraMap R L u) hqu)
     (shuffle a b hab ha hb (algebraMap R L u) (algebraMap R L q)
       (ThetaSymmetry.algebraicIndependent_swap hqu)) hgs ι hι Θ hΘ (by omega)
-    (by omega) hN (creationExpansion (algebraMap R L q) N hN)
-    (creationExpansion (algebraMap R L u) N hN)
+    (by omega) hN (ExternalDischarged.creationExpansion L (algebraMap R L q) N hN)
+    (ExternalDischarged.creationExpansion L (algebraMap R L u) N hN)
   have hmem := mem_reesRegComm_of_slopeHom hq hv hv1 hinj hΘ
   have hval' : signExtract L (Θ (coeffInc R L (elemSymm R N)) 1)
       = MvPolynomial.aeval ![algebraMap R L q, algebraMap R L u]
@@ -550,14 +549,13 @@ theorem phiReg_elemSymm_eq_areaPoly {N : ℕ} {q u : R} (hq : IsUnit (1 - q)) (h
     (hinj : Function.Injective (algebraMap R L)) (sp : R →+* F)
     (hsp : sp u = 1) {Θ : Lambda L →ₐ[L] Module.End L (Lambda L)}
     (hΘ : IsSlopeHom a b (algebraMap R L q) (algebraMap R L u) Θ) (shuffle : External.Shuffle L)
-    (epsilonGessel : External.EpsilonGessel L) (creationExpansion : External.CreationExpansion L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![algebraMap R L q, algebraMap R L u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L)
     (hι : IsRealisation ι) (hN : 0 < N) (g : PowerSeries ℤ →+* F) (hg : g PowerSeries.X = sp q) :
     phiReg b sp Θ (elemSymm R N) = g (Paths.areaPoly a b N) := by
-  rw [phiReg_elemSymm_eq_sum_area hq hv hv1 hinj sp hsp hΘ shuffle epsilonGessel creationExpansion
-    hab ha hb hqu ι hι hN, Paths.areaPoly, map_sum]
+  rw [phiReg_elemSymm_eq_sum_area hq hv hv1 hinj sp hsp hΘ shuffle hab ha hb hqu ι hι hN,
+    Paths.areaPoly, map_sum]
   exact Finset.sum_congr rfl fun y _ => by rw [map_pow, hg]
 
 end AExp
@@ -578,7 +576,6 @@ theorem genA_eq_formalExp {a b : ℕ} {R : Type*} [CommRing R] [Algebra ℚ R] {
     (sp : R →+* LaurentSeries ℚ) (hsp : sp u = 1) (hspq : sp q = Determinant.qVar)
     {Θ : Lambda L →ₐ[L] Module.End L (Lambda L)}
     (hΘ : IsSlopeHom a b (algebraMap R L q) (algebraMap R L u) Θ) (shuffle : External.Shuffle L)
-    (epsilonGessel : External.EpsilonGessel L) (creationExpansion : External.CreationExpansion L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![algebraMap R L q, algebraMap R L u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L)
@@ -591,8 +588,8 @@ theorem genA_eq_formalExp {a b : ℕ} {R : Type*} [CommRing R] [Algebra ℚ R] {
   match n with
   | 0 => rw [AExponential.areaPoly_zero, map_one, PhiE.elemSymm_zero, phiReg_one b hinj sp Θ]
   | m + 1 =>
-    rw [phiReg_elemSymm_eq_areaPoly hq hv hv1 hinj sp hsp hΘ shuffle epsilonGessel
-      creationExpansion hab ha hb hqu ι hι (Nat.succ_pos m) Determinant.qOfInt
+    rw [phiReg_elemSymm_eq_areaPoly hq hv hv1 hinj sp hsp hΘ shuffle
+      hab ha hb hqu ι hι (Nat.succ_pos m) Determinant.qOfInt
       (by rw [hspq, Determinant.qVar])]
 
 end GenA
@@ -1039,8 +1036,8 @@ commutation input and at the realisation of the ring of symmetric functions buil
 values on the power sums, the specialisation sending the second parameter to `1` and the first to
 the variable of `ℚ((q))`. -/
 theorem exists_slopeHom_genA (collinear : External.CollinearCommutation Base)
-    (shuffle : External.Shuffle Base) (epsilonGessel : External.EpsilonGessel Base)
-    (creationExpansion : External.CreationExpansion Base) {a b : ℕ} (hab : Nat.Coprime a b)
+    (shuffle : External.Shuffle Base)
+    {a b : ℕ} (hab : Nat.Coprime a b)
     (ha : 1 < a) (hb : a < b) :
     ∃ Θ : Lambda Base →ₐ[Base] Module.End Base (Lambda Base),
       IsSlopeHom a b (algebraMap Coeff Base q) (algebraMap Coeff Base u) Θ ∧
@@ -1048,7 +1045,7 @@ theorem exists_slopeHom_genA (collinear : External.CollinearCommutation Base)
           (AExponential.logSeries fun k => phiReg b sp Θ (powerSum Coeff k)) := by
   obtain ⟨Θ, hΘ⟩ := exists_isSlopeHom collinear hab ha hb
   exact ⟨Θ, hΘ, genA_eq_formalExp isUnit_one_sub_q isUnit_v isUnit_one_sub_v_pow
-    algebraMap_injective sp sp_u sp_q hΘ shuffle epsilonGessel creationExpansion hab ha hb
+    algebraMap_injective sp sp_u sp_q hΘ shuffle hab ha hb
     (algebraicIndependent_param (algebraMap Coeff Base) algebraMap_injective _ rfl)
     (realise Base) (isRealisation_realise Base)⟩
 

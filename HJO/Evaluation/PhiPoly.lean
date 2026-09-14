@@ -7,6 +7,7 @@ module
 
 public import HJO.Paths.ReturnPathSolves
 public import HJO.Evaluation.AExponential
+public import HJO.Discharged.External
 public meta import HJO.Attr
 
 /-! # Reading the evaluation of a slope homomorphism off an integer polynomial
@@ -89,7 +90,7 @@ theorem aeval_signedReturnPoly {R : Type*} [CommRing R] [Algebra ℤ R] (a b N :
 value at the two parameters of the witness polynomial of the return composition `α.reverse`, the
 below-diagonal convention reading the blocks of the seed's composition from the other end. -/
 theorem signExtract_copComp_eq_aeval {L : Type*} [Field L] [Algebra ℚ L] {q u : L}
-    (shuffle : External.Shuffle L) (epsilonGessel : External.EpsilonGessel L)
+    (shuffle : External.Shuffle L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![q, u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L) (hι : IsRealisation ι)
@@ -98,7 +99,7 @@ theorem signExtract_copComp_eq_aeval {L : Type*} [Field L] [Algebra ℚ L] {q u 
     signExtract L (Θ (CopComp q α 1) 1) =
       MvPolynomial.aeval ![q, u] (signedReturnPoly a b N α.reverse) := by
   have h := EpsilonSelection.signExtract_copComp_eq_sum_paths (shuffle a b hab ha hb q u hqu)
-    epsilonGessel ι hι Θ hΘ (by omega) (by omega) hN α hαpos hα
+    (ExternalDischarged.epsilonGessel L) ι hι Θ hΘ (by omega) (by omega) hN α hαpos hα
   rw [aeval_signedReturnPoly, ← h, ← mul_assoc, neg_one_pow_mul_self, one_mul]
 
 /-! ### The value read off a witness polynomial -/
@@ -166,7 +167,7 @@ block hook count. -/
 theorem phiValue_cop_one_pow {L : Type*} [Field L] [Algebra ℚ L] {q u : L}
     (rankOne : External.RankOneDinv) (goodTraverse : External.GoodTraverse)
     (coercivity : HJO.Literature.HuangCoercivity) (shuffle : External.Shuffle L)
-    (epsilonGessel : External.EpsilonGessel L) (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
+    (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![q, u]) (ι : Lambda L →ₐ[L] AlphabetSeries L)
     (hι : IsRealisation ι) (Θ : Lambda L →ₐ[L] Module.End L (Lambda L))
     (hΘ : IsSlopeHom a b q u Θ) (hN : 0 < N) :
@@ -177,7 +178,7 @@ theorem phiValue_cop_one_pow {L : Type*} [Field L] [Algebra ℚ L] {q u : L}
           phiValue b N π = (X : ℤ⟦X⟧) ^ kappaShift a b N * Gaps.finiteSeries a b N := by
   have hwit : signExtract L (Θ ((Cop q 1 ^ N) 1) 1) =
       MvPolynomial.aeval ![q, u] (signedReturnPoly a b N (List.replicate N 1)) := by
-    rw [← copComp_replicate, signExtract_copComp_eq_aeval shuffle epsilonGessel hab ha hb hqu ι hι
+    rw [← copComp_replicate, signExtract_copComp_eq_aeval shuffle hab ha hb hqu ι hι
       Θ hΘ hN _ (fun x hx => by rw [List.eq_of_mem_replicate hx]; omega) (by simp),
       List.reverse_replicate]
   refine ⟨hwit, fun π hπ => ?_⟩
@@ -192,9 +193,8 @@ integer polynomial, and substituting the variable for the first parameter and `1
 in any such polynomial gives the area polynomial of all below-diagonal `(aN, bN)`-paths. -/
 @[hjo "prop_phi_e"]
 theorem phiValue_elemSymm {L : Type*} [Field L] [Algebra ℚ L] {q u : L}
-    (shuffle : External.Shuffle L) (epsilonGessel : External.EpsilonGessel L)
-    (creationExpansion : External.CreationExpansion L) (hab : Nat.Coprime a b) (ha : 1 < a)
-    (hb : a < b) (hqu : AlgebraicIndependent ℤ ![q, u]) (ι : Lambda L →ₐ[L] AlphabetSeries L)
+    (shuffle : External.Shuffle L) (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
+    (hqu : AlgebraicIndependent ℤ ![q, u]) (ι : Lambda L →ₐ[L] AlphabetSeries L)
     (hι : IsRealisation ι) (Θ : Lambda L →ₐ[L] Module.End L (Lambda L))
     (hΘ : IsSlopeHom a b q u Θ) (hN : 0 < N) :
     signExtract L (Θ (elemSymm L N) 1) = MvPolynomial.aeval ![q, u] (signedPathPoly a b N) ∧
@@ -202,8 +202,10 @@ theorem phiValue_elemSymm {L : Type*} [Field L] [Algebra ℚ L] {q u : L}
         signExtract L (Θ (elemSymm L N) 1) = MvPolynomial.aeval ![q, u] π →
           phiValue b N π = areaPoly a b N := by
   obtain ⟨hval, hswap⟩ := signExtract_elemSymm_isPoly_and_swap (shuffle a b hab ha hb q u hqu)
-    (shuffle a b hab ha hb u q (algebraicIndependent_swap hqu)) epsilonGessel ι hι Θ hΘ
-    (by omega) (by omega) hN (creationExpansion q N hN) (creationExpansion u N hN)
+    (shuffle a b hab ha hb u q (algebraicIndependent_swap hqu))
+    (ExternalDischarged.epsilonGessel L) ι hι Θ hΘ
+    (by omega) (by omega) hN (ExternalDischarged.creationExpansion L q N hN)
+    (ExternalDischarged.creationExpansion L u N hN)
   refine ⟨hval, fun π hπ => ?_⟩
   have hsym : signedPathPoly a b N = MvPolynomial.rename ![1, 0] (signedPathPoly a b N) :=
     eq_of_aeval_eq hqu (by rw [aeval_rename_swap]; exact hswap)

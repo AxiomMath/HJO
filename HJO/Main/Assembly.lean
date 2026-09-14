@@ -247,13 +247,12 @@ theorem specOf_qPochhammer (hmul : IsEvaluationHom b q u Θ Φ) (N : ℕ) :
 
 variable (rankOne : External.RankOneDinv) (goodTraverse : External.GoodTraverse)
   (coercivity : HJO.Literature.HuangCoercivity) (shuffle : External.Shuffle L)
-  (epsilonGessel : External.EpsilonGessel L) (creationExpansion : External.CreationExpansion L)
   (ι : Sym.Lambda L →ₐ[L] Sym.AlphabetSeries L) (hι : Sym.IsRealisation ι)
   (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
   (hqu : AlgebraicIndependent ℤ ![algebraMap K L q, u])
   (hΘ : Sym.IsSlopeHom a b (algebraMap K L q) u Θ) (hmul : IsEvaluationHom b q u Θ Φ)
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel hι hab ha hb hqu hΘ hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The return evaluation: the evaluation map takes the `N`-fold iterate of the creation operator of
 a single block, applied to `1`, to the finite polynomial shifted by the block hook count. -/
 theorem phi_cop_one_pow {N : ℕ} (hN : 0 < N) :
@@ -263,20 +262,19 @@ theorem phi_cop_one_pow {N : ℕ} (hN : 0 < N) :
   have hq0 := ne_zero_of_algebraicIndependent hqu
   have hq := pow_succ_ne_one_of_algebraicIndependent hqu
   obtain ⟨hwit, hall⟩ := PhiPoly.phiValue_cop_one_pow rankOne goodTraverse coercivity shuffle
-    epsilonGessel hab ha hb hqu ι hι Θ hΘ hN
+    hab ha hb hqu ι hι Θ hΘ hN
   rw [hmul N _ _ (Endgame.isWeightedHomogeneous_cop_one_pow q hq0 hq N)
     (by rw [map_cop_one_pow_apply_one q hq0 hq]; exact hwit)]
   exact congrArg Determinant.qOfInt (hall _ hwit)
 
-include shuffle epsilonGessel creationExpansion hι hab ha hb hqu hΘ hmul in
+include shuffle hι hab ha hb hqu hΘ hmul in
 /-- The all-path evaluation: the evaluation map takes the elementary symmetric function of degree
 `N` to the area polynomial of all below-diagonal `(aN, bN)`-paths. -/
 theorem phi_elemSymm (N : ℕ) :
     Φ (Sym.elemSymm K N) = Determinant.qOfInt (Paths.areaPoly a b N) := by
   rcases Nat.eq_zero_or_pos N with rfl | hN
   · rw [PhiE.elemSymm_zero, map_one, AExponential.areaPoly_zero, map_one]
-  · obtain ⟨hval, hall⟩ := PhiPoly.phiValue_elemSymm shuffle epsilonGessel creationExpansion
-      hab ha hb hqu ι hι Θ hΘ hN
+  · obtain ⟨hval, hall⟩ := PhiPoly.phiValue_elemSymm shuffle hab ha hb hqu ι hι Θ hΘ hN
     rw [hmul N _ _ (PhiE.isWeightedHomogeneous_elemSymm K N)
       (by rw [map_elemSymm]; exact hval)]
     exact congrArg Determinant.qOfInt (hall _ hval)
@@ -292,7 +290,7 @@ omit [Algebra ℚ K] in
 theorem phiDiv_apply (q : K) (f : Sym.Lambda K) :
     phiDiv q Φ f = Φ (CopPower.plethDiv q f) := rfl
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel hι hab ha hb hqu hΘ hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The evaluation map takes the complete homogeneous symmetric function of degree `N` on the
 divided alphabet to the finite polynomial shifted by the rank shift, divided by the `q`-Pochhammer
 symbol: the iterated return seed differs from it by the constant that the rank shift absorbs. -/
@@ -307,7 +305,7 @@ theorem phiDiv_completeHomog_mul_qPochhammer (N : ℕ) :
   · rw [phiDiv_apply, CopPower.completeHomog_zero, map_one, map_one, qPochhammer_zero, map_one,
       one_mul, Paths.gammaShift, Endgame.finiteSeries_zero a b hab ha hb]
     simp
-  · have hr := phi_cop_one_pow rankOne goodTraverse coercivity shuffle epsilonGessel ι hι hab ha hb
+  · have hr := phi_cop_one_pow rankOne goodTraverse coercivity shuffle ι hι hab ha hb
       hqu hΘ hmul hN
     rw [CopPower.cop_one_pow_apply_one q hq0 hq N, map_mul, ← specOf_apply, map_mul, map_zpow₀,
       specOf_q hmul, specOf_qPochhammer hmul, zpow_neg, zpow_natCast, ← phiDiv_apply] at hr
@@ -321,17 +319,17 @@ theorem phiDiv_completeHomog_mul_qPochhammer (N : ℕ) :
     rw [hgam, map_mul, map_pow, ← Determinant.qVar, ← hr]
     field_simp
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel hι hab ha hb hqu hΘ hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The `z^N` coefficient of the generating series of the finite polynomials is the evaluation of
 the complete homogeneous symmetric function of degree `N` on the divided alphabet. -/
 theorem coeff_genH (N : ℕ) :
     PowerSeries.coeff N (Determinant.genH a b) = phiDiv q Φ (Sym.completeHomog K N) := by
   rw [Determinant.genH, PowerSeries.coeff_mk,
     div_eq_iff (Endgame.qOfInt_qPochhammer_ne_zero N)]
-  exact (phiDiv_completeHomog_mul_qPochhammer rankOne goodTraverse coercivity shuffle epsilonGessel
+  exact (phiDiv_completeHomog_mul_qPochhammer rankOne goodTraverse coercivity shuffle
     ι hι hab ha hb hqu hΘ hmul N).symm
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel hι hab ha hb hqu hΘ hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- `ℋ(z;q) = exp(∑_{k ≥ 1} r_k z^k / (k (1 - q^k)))`: the generating series of the finite
 polynomials is the formal exponential of the series built from the evaluation coefficients. -/
 theorem genH_eq_formalExp :
@@ -340,7 +338,7 @@ theorem genH_eq_formalExp :
   have hmk : Determinant.genH a b
       = PowerSeries.mk fun N => phiDiv q Φ (Sym.completeHomog K N) :=
     PowerSeries.ext fun N => by
-      rw [PowerSeries.coeff_mk, coeff_genH rankOne goodTraverse coercivity shuffle epsilonGessel
+      rw [PowerSeries.coeff_mk, coeff_genH rankOne goodTraverse coercivity shuffle
         ι hι hab ha hb hqu hΘ hmul N]
   refine Endgame.eq_formalExp_coeffLog ?_ ?_
   · rw [hmk, CopPower.derivative_mk_completeHomog (phiDiv q Φ)]
@@ -351,7 +349,7 @@ theorem genH_eq_formalExp :
       specOf_q hmul, div_eq_inv_mul]
   · rw [hmk, PowerSeries.coeff_mk, phiDiv_apply, CopPower.completeHomog_zero, map_one, map_one]
 
-include shuffle epsilonGessel creationExpansion hι hab ha hb hqu hΘ hmul in
+include shuffle hι hab ha hb hqu hΘ hmul in
 /-- `𝒜(z;q) = exp(∑_{k ≥ 1} (-1)^{k-1} r_k z^k / k)`: the area generating series is the formal
 exponential of the alternating series built from the evaluation coefficients. -/
 theorem genA_eq_formalExp :
@@ -360,25 +358,22 @@ theorem genA_eq_formalExp :
   have hmk : Determinant.genA a b = PowerSeries.mk fun n => Φ (Sym.elemSymm K n) :=
     PowerSeries.ext fun n => by
       rw [Determinant.genA, PowerSeries.coeff_mk, PowerSeries.coeff_mk,
-        phi_elemSymm shuffle epsilonGessel creationExpansion ι hι hab ha hb hqu hΘ hmul n]
+        phi_elemSymm shuffle ι hι hab ha hb hqu hΘ hmul n]
   rw [hmk]
   refine AExponential.eq_formalExp_logSeries (AExponential.derivative_mk_elemSymm Φ) ?_
   rw [PowerSeries.coeff_mk, PhiE.elemSymm_zero, map_one]
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel creationExpansion hι hab ha hb hqu hΘ
-  hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The generating series of the finite polynomials satisfies the common `q`-difference equation:
 both it and the area series are exponentials in the same evaluation coefficients, and subtracting
 the logarithm of the first from its value at `qz` telescopes to the logarithm of the second read at
 `-z`. -/
 theorem isCommonSolution_genH : Determinant.IsCommonSolution a b (Determinant.genH a b) :=
   Endgame.isCommonSolution_genH (fun j => Φ (Sym.powerSum K j))
-    (genH_eq_formalExp rankOne goodTraverse coercivity shuffle epsilonGessel ι hι hab ha hb hqu hΘ
-      hmul)
-    (genA_eq_formalExp shuffle epsilonGessel creationExpansion ι hι hab ha hb hqu hΘ hmul)
+    (genH_eq_formalExp rankOne goodTraverse coercivity shuffle ι hι hab ha hb hqu hΘ hmul)
+    (genA_eq_formalExp shuffle ι hι hab ha hb hqu hΘ hmul)
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel creationExpansion hι hab ha hb hqu hΘ
-  hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The scalar recurrence: the coefficientwise form of the common equation for the generating
 series of the finite polynomials. -/
 theorem finiteSeries_recurrence (N : ℕ) (hN : 0 < N) :
@@ -387,11 +382,10 @@ theorem finiteSeries_recurrence (N : ℕ) (hN : 0 < N) :
           PowerSeries.X ^ Paths.gammaShift a b (N - j) * Gaps.finiteSeries a b (N - j) *
           ∏ i ∈ Ico (N - j + 1) N, (1 - PowerSeries.X ^ i) :=
   Endgame.finiteSeries_recurrence
-    (isCommonSolution_genH rankOne goodTraverse coercivity shuffle epsilonGessel creationExpansion
+    (isCommonSolution_genH rankOne goodTraverse coercivity shuffle
       ι hι hab ha hb hqu hΘ hmul) N hN
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel creationExpansion hι hab ha hb hqu hΘ
-  hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The finite identity `F_N(q) = (q)_N C_{𝐜,≤N}(q)`: the determinant series read at `-z` satisfies
 the same `q`-difference equation, uniqueness of the normalised solution identifies the two, and the
 rank shift cancels against the coefficient count of the determinant. -/
@@ -405,11 +399,10 @@ theorem finiteSeries_eq_qPochhammer_mul_boundedGF (N : ℕ) :
     rw [DetCoeffSolves.coeff_rescale_neg_one_detSeries a b M hab (by omega) (by omega), map_mul,
       map_pow, ← Determinant.qVar]
   exact Endgame.finiteSeries_eq_qPochhammer_mul_boundedGF hab (by omega) (by omega)
-    (isCommonSolution_genH rankOne goodTraverse coercivity shuffle epsilonGessel creationExpansion
+    (isCommonSolution_genH rankOne goodTraverse coercivity shuffle
       ι hι hab ha hb hqu hΘ hmul) hdet N
 
-include rankOne goodTraverse coercivity shuffle epsilonGessel creationExpansion hι hab ha hb hqu hΘ
-  hmul in
+include rankOne goodTraverse coercivity shuffle hι hab ha hb hqu hΘ hmul in
 /-- The Huang--Jiang--Oblomkov conjecture: passing to the coefficientwise limit in the finite
 identity gives `Z = (q)_∞ C_𝐜`, and the cylindric product identifies the right side with the
 Huang--Jiang--Oblomkov product. -/
@@ -418,7 +411,7 @@ theorem conjecture (cylindricProduct : HJO.Literature.CylindricProduct) : HJO.Co
   change HJO.zNat a b = HJO.charge a b
   rw [Limits.zNat_eq_qPochhammerInf_mul_unboundedGF coercivity hab ha hb
     (finiteSeries_eq_qPochhammer_mul_boundedGF rankOne goodTraverse coercivity shuffle
-      epsilonGessel creationExpansion ι hι hab ha hb hqu hΘ hmul),
+      ι hι hab ha hb hqu hΘ hmul),
     Limits.qPochhammerInf_mul_unboundedGF_eq_charge cylindricProduct hab ha hb]
 
 end Evaluation

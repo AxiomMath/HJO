@@ -6,6 +6,9 @@ Authors: Kenny Lau
 module
 
 public import HJO.Main.Assembly
+public import HJO.Discharged.Coercivity
+public import HJO.Discharged.CylindricProduct
+public import HJO.Discharged.GoodTraverse
 public import HJO.Evaluation.PhiMul
 public meta import HJO.Attr
 
@@ -33,6 +36,15 @@ them is a polynomial in two variables over `ℤ` vanishing after the substitutio
 The conclusions are the exponential form of the generating series of the finite polynomials, the
 `q`-difference equation it satisfies, the scalar recurrence, the finite identity and the
 conjecture. Beyond the results quoted from the literature nothing is assumed.
+
+Only two of those quoted results are still needed. Six of the eight are proved in
+`HJO/Discharged/`: the rank-one dinv identity, the Macdonald--Gessel reading of sign extraction and
+the creation-seed expansion of an elementary symmetric function in `HJO.ExternalDischarged`, the
+good-traverse factorisation as `HJO.GoodTraverseDischarged.goodTraverse`, Huang's coercivity bound
+as `HJO.CoercivityDischarged.huangCoercivity`, and the Foda--Welsh cylindric product as
+`HJO.CylindricProductDischarged.cylindricProduct`. The conclusions below take only the two that
+remain quoted -- the collinear commutation of the slope operators and the compositional rational
+shuffle identity -- and supply the other six from those proofs.
 -/
 
 @[expose] public section
@@ -130,10 +142,8 @@ theorem isEvaluationHom_phi {a b : ℕ} {Θ : Lambda Base →ₐ[Base] Module.En
 polynomials is the formal exponential of the series built from the evaluation coefficients, at a
 slope homomorphism and an evaluation map which are exhibited rather than assumed. -/
 @[hjo "lem_h_exponential"]
-theorem exists_genH_eq_formalExp (rankOne : External.RankOneDinv)
-    (goodTraverse : External.GoodTraverse) (coercivity : HJO.Literature.HuangCoercivity)
-    (collinear : External.CollinearCommutation Base) (shuffle : External.Shuffle Base)
-    (epsilonGessel : External.EpsilonGessel Base) {a b : ℕ} (hab : Nat.Coprime a b) (ha : 1 < a)
+theorem exists_genH_eq_formalExp (collinear : External.CollinearCommutation Base)
+    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b) (ha : 1 < a)
     (hb : a < b) :
     ∃ (Θ : Lambda Base →ₐ[Base] Module.End Base (Lambda Base))
       (Φ : Lambda Target →+* LaurentSeries ℚ),
@@ -143,7 +153,8 @@ theorem exists_genH_eq_formalExp (rankOne : External.RankOneDinv)
             (Endgame.coeffLog fun j => Φ (powerSum Target j) / (1 - Determinant.qVar ^ j)) := by
   obtain ⟨Θ, hΘ⟩ := Witness.exists_isSlopeHom collinear hab ha hb
   exact ⟨Θ, phi hΘ, hΘ, isEvaluationHom_phi hΘ,
-    Assembly.genH_eq_formalExp rankOne goodTraverse coercivity shuffle epsilonGessel
+    Assembly.genH_eq_formalExp ExternalDischarged.rankOneDinv
+      GoodTraverseDischarged.goodTraverse CoercivityDischarged.huangCoercivity shuffle
       (realise Base) (isRealisation_realise Base) hab ha hb
       (Witness.algebraicIndependent_param (algebraMap Coeff Base) Witness.algebraMap_injective _
         algebraMap_qVar)
@@ -151,64 +162,54 @@ theorem exists_genH_eq_formalExp (rankOne : External.RankOneDinv)
 
 /-- The generating series of the finite polynomials solves the common `q`-difference equation. -/
 @[hjo "prop_hjo_equation"]
-theorem isCommonSolution_genH (rankOne : External.RankOneDinv)
-    (goodTraverse : External.GoodTraverse) (coercivity : HJO.Literature.HuangCoercivity)
-    (collinear : External.CollinearCommutation Base) (shuffle : External.Shuffle Base)
-    (epsilonGessel : External.EpsilonGessel Base)
-    (creationExpansion : External.CreationExpansion Base) {a b : ℕ} (hab : Nat.Coprime a b)
+theorem isCommonSolution_genH (collinear : External.CollinearCommutation Base)
+    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b)
     (ha : 1 < a) (hb : a < b) :
     Determinant.IsCommonSolution a b (Determinant.genH a b) := by
   obtain ⟨Θ, hΘ⟩ := Witness.exists_isSlopeHom collinear hab ha hb
-  exact Assembly.isCommonSolution_genH rankOne goodTraverse coercivity shuffle epsilonGessel
-    creationExpansion (realise Base) (isRealisation_realise Base) hab ha hb
+  exact Assembly.isCommonSolution_genH ExternalDischarged.rankOneDinv
+    GoodTraverseDischarged.goodTraverse CoercivityDischarged.huangCoercivity shuffle
+    (realise Base) (isRealisation_realise Base) hab ha hb
     (Witness.algebraicIndependent_param (algebraMap Coeff Base) Witness.algebraMap_injective _
       algebraMap_qVar) (by rw [algebraMap_qVar]; exact hΘ) (isEvaluationHom_phi hΘ)
 
 /-- The scalar recurrence: the coefficientwise form of the common equation for the generating
 series of the finite polynomials. -/
 @[hjo "lem_recurrence"]
-theorem finiteSeries_recurrence (rankOne : External.RankOneDinv)
-    (goodTraverse : External.GoodTraverse) (coercivity : HJO.Literature.HuangCoercivity)
-    (collinear : External.CollinearCommutation Base) (shuffle : External.Shuffle Base)
-    (epsilonGessel : External.EpsilonGessel Base)
-    (creationExpansion : External.CreationExpansion Base) {a b : ℕ} (hab : Nat.Coprime a b)
+theorem finiteSeries_recurrence (collinear : External.CollinearCommutation Base)
+    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b)
     (ha : 1 < a) (hb : a < b) (N : ℕ) (hN : 0 < N) :
     (PowerSeries.X : PowerSeries ℤ) ^ Paths.gammaShift a b N * Gaps.finiteSeries a b N
       = ∑ j ∈ Icc 1 N, (-1 : PowerSeries ℤ) ^ (j + 1) * Paths.areaPoly a b j *
           PowerSeries.X ^ Paths.gammaShift a b (N - j) * Gaps.finiteSeries a b (N - j) *
           ∏ i ∈ Ico (N - j + 1) N, (1 - PowerSeries.X ^ i) :=
-  Endgame.finiteSeries_recurrence (isCommonSolution_genH rankOne goodTraverse coercivity collinear
-    shuffle epsilonGessel creationExpansion hab ha hb) N hN
+  Endgame.finiteSeries_recurrence (isCommonSolution_genH collinear shuffle hab ha hb) N hN
 
 /-- The finite identity `F_N(q) = (q)_N C_{𝐜,≤N}(q)`. -/
 @[hjo "thm_finite"]
-theorem finiteSeries_eq_qPochhammer_mul_boundedGF (rankOne : External.RankOneDinv)
-    (goodTraverse : External.GoodTraverse) (coercivity : HJO.Literature.HuangCoercivity)
-    (collinear : External.CollinearCommutation Base) (shuffle : External.Shuffle Base)
-    (epsilonGessel : External.EpsilonGessel Base)
-    (creationExpansion : External.CreationExpansion Base) {a b : ℕ} (hab : Nat.Coprime a b)
+theorem finiteSeries_eq_qPochhammer_mul_boundedGF (collinear : External.CollinearCommutation Base)
+    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b)
     (ha : 1 < a) (hb : a < b) (N : ℕ) :
     Gaps.finiteSeries a b N
       = qPochhammer PowerSeries.X PowerSeries.X N * HJO.Cylindric.boundedGF a b N := by
   obtain ⟨Θ, hΘ⟩ := Witness.exists_isSlopeHom collinear hab ha hb
-  exact Assembly.finiteSeries_eq_qPochhammer_mul_boundedGF rankOne goodTraverse coercivity shuffle
-    epsilonGessel creationExpansion (realise Base) (isRealisation_realise Base) hab ha hb
+  exact Assembly.finiteSeries_eq_qPochhammer_mul_boundedGF ExternalDischarged.rankOneDinv
+    GoodTraverseDischarged.goodTraverse CoercivityDischarged.huangCoercivity shuffle
+    (realise Base) (isRealisation_realise Base) hab ha hb
     (Witness.algebraicIndependent_param (algebraMap Coeff Base) Witness.algebraMap_injective _
       algebraMap_qVar) (by rw [algebraMap_qVar]; exact hΘ) (isEvaluationHom_phi hΘ) N
 
 /-- The Huang--Jiang--Oblomkov conjecture. -/
 @[hjo "thm_main"]
-theorem conjecture (rankOne : External.RankOneDinv) (goodTraverse : External.GoodTraverse)
-    (coercivity : HJO.Literature.HuangCoercivity) (collinear : External.CollinearCommutation Base)
-    (shuffle : External.Shuffle Base) (epsilonGessel : External.EpsilonGessel Base)
-    (creationExpansion : External.CreationExpansion Base)
-    (cylindricProduct : HJO.Literature.CylindricProduct) {a b : ℕ} (hab : Nat.Coprime a b)
+theorem conjecture (collinear : External.CollinearCommutation Base)
+    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b)
     (ha : 1 < a) (hb : a < b) : HJO.Conjecture a b := by
   obtain ⟨Θ, hΘ⟩ := Witness.exists_isSlopeHom collinear hab ha hb
-  exact Assembly.conjecture rankOne goodTraverse coercivity shuffle epsilonGessel
-    creationExpansion (realise Base) (isRealisation_realise Base) hab ha hb
+  exact Assembly.conjecture ExternalDischarged.rankOneDinv GoodTraverseDischarged.goodTraverse
+    CoercivityDischarged.huangCoercivity shuffle
+    (realise Base) (isRealisation_realise Base) hab ha hb
     (Witness.algebraicIndependent_param (algebraMap Coeff Base) Witness.algebraMap_injective _
       algebraMap_qVar) (by rw [algebraMap_qVar]; exact hΘ) (isEvaluationHom_phi hΘ)
-    cylindricProduct
+    CylindricProductDischarged.cylindricProduct
 
 end HJO.Final

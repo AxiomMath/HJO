@@ -217,7 +217,7 @@ series of the images of the elementary symmetric functions under the evaluation 
 theorem genA_eq_mk_phi_elemSymm {q u : L} (spec : L →+* LaurentSeries ℚ)
     (hspecq : spec q = Determinant.qVar) (hspecu : spec u = 1)
     (Θ : Lambda L →ₐ[L] Module.End L (Lambda L)) (hΘ : IsSlopeHom a b q u Θ)
-    (shuffle : External.Shuffle L) (epsilonGessel : External.EpsilonGessel L)
+    (shuffle : External.Shuffle L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![q, u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L) (hι : IsRealisation ι)
@@ -229,7 +229,7 @@ theorem genA_eq_mk_phi_elemSymm {q u : L} (spec : L →+* LaurentSeries ℚ)
   | 0 =>
     rw [areaPoly_zero, map_one, PhiE.elemSymm_zero, PhiHom.phi_one]
   | m + 1 =>
-    rw [PhiE.phi_elemSymm_eq_areaPoly spec hspecu Θ hΘ shuffle epsilonGessel hab ha hb hqu ι hι
+    rw [PhiE.phi_elemSymm_eq_areaPoly spec hspecu Θ hΘ shuffle hab ha hb hqu ι hι
       (Nat.succ_pos m) (hexp (m + 1)) (hexpSwap (m + 1)) Determinant.qOfInt
       (by rw [hspecq, Determinant.qVar])]
 
@@ -244,13 +244,13 @@ theorem genA_eq_formalExp {q u : L} (spec : L →+* LaurentSeries ℚ)
     (hspecq : spec q = Determinant.qVar) (hspecu : spec u = 1) (hv0 : q * u ≠ 0)
     (hv1 : ∀ j : ℕ, (q * u) ^ (j + 1) ≠ 1)
     (Θ : Lambda L →ₐ[L] Module.End L (Lambda L)) (hΘ : IsSlopeHom a b q u Θ)
-    (shuffle : External.Shuffle L) (epsilonGessel : External.EpsilonGessel L)
+    (shuffle : External.Shuffle L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![q, u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L) (hι : IsRealisation ι)
     (hexp : ∀ n : ℕ, IsCreationExpansion n q) (hexpSwap : ∀ n : ℕ, IsCreationExpansion n u) :
     Determinant.genA a b = formalExp (logSeries (phiCoeff b spec Θ)) := by
-  rw [genA_eq_mk_phi_elemSymm spec hspecq hspecu Θ hΘ shuffle epsilonGessel hab ha hb hqu ι hι hexp
+  rw [genA_eq_mk_phi_elemSymm spec hspecq hspecu Θ hΘ shuffle hab ha hb hqu ι hι hexp
     hexpSwap, mk_phi_elemSymm_eq_formalExp spec Θ hspecu hv0 hv1 hΘ]
 
 end Main

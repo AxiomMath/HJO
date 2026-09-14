@@ -16,12 +16,17 @@ public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
 public import QSeriesLib.NumberTheory.HJO.Defs
 public meta import HJO.Attr
 
-/-! # The definitions of the development
+/-! # The definitions of this library
 
 The objects the results of this library are stated in, collected in one module: the ring of
 symmetric functions and its operators, below-diagonal paths, parking functions, the gap poset,
 cylindric partitions, the HJO polynomial, the model types `Target`, `Coeff` and `Base` of the
-specialisation, and the results quoted from the literature stated as hypotheses.
+specialisation, and the results quoted from the literature stated as `Prop`s.
+
+Of those eight quoted results, six are theorems of this library: `HJO/Discharged/` proves them,
+and their `Prop`s survive here as the statements those proofs conclude. Only
+`External.CollinearCommutation` and `External.Shuffle` are still assumed, and they are the two
+hypotheses the results in `HJO/Main/Final.lean` carry.
 -/
 
 @[expose] public section
@@ -677,7 +682,7 @@ namespace HJO.Literature
 
 open scoped PowerSeries.DiscreteTopology QTheory
 
-/-! ### Huang's coercivity theorem as hypothesis
+/-! ### Huang's coercivity theorem
 
 Y. Huang, with an appendix by K. Lau, *A quadratic form generalization of rational dinv*,
 arXiv:2604.13238, Res. Math. Sci. **13** (2026) article 44, doi 10.1007/s40687-026-00631-0,
@@ -693,7 +698,7 @@ def HuangCoercivity : Prop :=
     ∀ n : gaps(a, b) → ℤ, n ∈ cone a b →
       ∀ i : gaps(a, b), n i ^ 2 ≤ (gaps(a, b)).card * Q a b n
 
-/-! ### The cylindric product as hypothesis
+/-! ### The cylindric product
 
 O. Foda and T. A. Welsh, *Cylindric partitions, `W_r` characters and the
 Andrews–Gordon–Bressoud identities*, arXiv:1510.02213, J. Phys. A **49** (2016) 164004,
@@ -705,7 +710,7 @@ unbounded cylindric series, in its explicit form rather than as an identificatio
 
 /-- **The standard cylindric product**: `(q)_∞ C_c(q)` equals
 `(q^d;q^d)_∞^{a-1} / (q;q)_∞^{a-1} · ∏_{s=1}^{a-1} ∏_{v=0}^{a-1} (q^{J_{v,s}}; q^d)_∞`,
-with `d = a + b`. Assumed at every coprime pair satisfying `1 < a < b`. -/
+with `d = a + b`. Stated at every coprime pair satisfying `1 < a < b`. -/
 @[hjo "lem_cylindric_product"]
 def CylindricProduct : Prop :=
   ∀ a b : ℕ, Nat.Coprime a b → 1 < a → a < b →

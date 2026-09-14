@@ -13,10 +13,9 @@ public import QSeriesLib.NumberTheory.HJO.Defs
 /-! # The formal challenge file, written by humans
 
 This is a human-written file certifying the formal statements that this repository proves: the
-Huang--Jiang--Oblomkov conjecture, and the finite identity behind it, as consequences of the
-eight results quoted from the literature. The definitions the statements are phrased in are
-written out here; those taken from `Mathlib` and `QSeriesLib` -- the gap set, the quadratic form,
-the cone, the Pochhammer conventions and the conjecture itself -- are part of the contract too.
+Huang--Jiang--Oblomkov conjecture, and the finite identity behind it, as consequences of two
+results quoted from the literature -- the collinear commutativity of the slope operators and the
+compositional rational shuffle identity.
 -/
 
 @[expose] public section
@@ -62,18 +61,10 @@ structure IsRealisation (ι : Lambda K →ₐ[K] AlphabetSeries K) : Prop where
 
 /-- A diagonal substitution: the `K`-algebra endomorphism of `Lambda K` sending the formal
 power sum `p_{i+1}` to `c i * p_{i+1}`. The coefficient of a power-sum monomial in the image is
-the matching product of the scalars times its coefficient in the argument. The scaling and
-axis substitutions have this form; the affine displacements `plethShift` and `plethCreate`
-do not. -/
+the matching product of the scalars times its coefficient in the argument. The axis substitution
+`plethAxis` has this form; the affine displacements `plethShift` and `plethCreate` do not. -/
 noncomputable def diagScale (c : ℕ → K) : Lambda K →ₐ[K] Lambda K :=
   MvPolynomial.aeval fun i => MvPolynomial.C (c i) * MvPolynomial.X i
-
-/-- Scaling the alphabet by `c`: the `K`-algebra endomorphism `σ_c` of `Lambda K` sending
-`p_k` to `c ^ k * p_k`, written `f[cX]` on elements. It is the diagonal substitution whose scalar
-at `p_k` is the `k`-th power of a single element, which is what the plethysm of an honest monomial
-alphabet does. -/
-noncomputable def plethScale (c : K) : Lambda K →ₐ[K] Lambda K :=
-  diagScale fun i => c ^ (i + 1)
 
 /-- The plethystic displacement `δ`, sending `p_k` to `p_k + (1 - q ^ k) * (1 - u ^ k) * z⁻ᵏ`
 and written `f[X + M/z]` on elements. Its target is the polynomial ring on `w = z⁻¹`, since
@@ -117,11 +108,6 @@ termination_by n => n
 decreasing_by omega
 
 end Newton
-
-/-- Sign extraction: the `K`-algebra homomorphism `Lambda K → K` sending `p_k` to
-`(-1) ^ (k - 1)`. -/
-noncomputable def signExtract (K : Type*) [CommRing K] : Lambda K →ₐ[K] K :=
-  MvPolynomial.aeval fun i => (-1 : K) ^ i
 
 /-! ### The basic operators and the split of a slope -/
 
@@ -179,11 +165,6 @@ The definition is totalized at `v = 0`, where it sends every positive power sum 
 the quotient identity used to explain the nonsingular alphabet does not hold there. -/
 noncomputable def plethAxis (v : L) : Lambda L →ₐ[L] Lambda L :=
   diagScale fun index => (v ^ (index + 1))⁻¹ - 1
-
-omit [Algebra ℚ L] in
-/-- The axis alphabet as a diagonal substitution, the form its coefficients are read off from. -/
-theorem plethAxis_eq_diagScale (v : L) :
-    plethAxis v = diagScale fun index => (v ^ (index + 1))⁻¹ - 1 := rfl
 
 /-- For `k ≥ 1`, the axis generator `U_k` at `v = q * u`, with source formula
 `v / (v - 1) * h_k[(1 - v) / v * X]` for `v ≠ 0, 1`. The definition also assigns values at
@@ -343,34 +324,6 @@ instance instDecidableHasReturns {a b N : ℕ} (α : List ℕ) (y : Heights a b 
 
 end HJO.Paths
 
-namespace HJO.Primitive
-
-open Finset
-
-/-- The number of indices `i ∈ Icc 1 b` with `ai < rb` and `rb - ai ∈ F`.
-For `a > 0`, `r ≤ a` and `F` a set of gaps, this counts all positive indices with gap label
-`rb - ai`: `ai < rb ≤ ab` forces `i < b`, and a nonpositive difference cannot be a gap.
-These are the bounds supplied by `primitivePath`; the unrestricted definition outside this
-column domain makes no claim that the cutoff loses no indices. -/
-def primitiveHeight (a b : ℕ) (F : Finset ℕ) (r : ℕ) : ℕ :=
-  #{i ∈ Icc 1 b | a * i < r * b ∧ r * b - a * i ∈ F}
-
-/-- The counted indices lie in `Icc 1 b`, so a primitive height never exceeds `b`. -/
-theorem primitiveHeight_le (a b : ℕ) (F : Finset ℕ) (r : ℕ) : primitiveHeight a b F r ≤ b :=
-  (card_filter_le _ _).trans (by simp)
-
-/-- A candidate height vector, with height `primitiveHeight a b F r` for `r < a` and `b` at
-`r = a`. For coprime `1 < a < b` and `F` an order filter of the gap set, this is the primitive
-below-diagonal path `P_F`: each interior height counts the positive indices `i` with gap label
-`rb - ai` in `F`. The endpoint is set separately because every nonnegative `ab - ai` is a
-multiple of `a`, hence not a gap. An arbitrary gap subset need not give monotone heights. -/
-def primitivePath (a b : ℕ) (F : Finset ℕ) : Paths.Heights a b 1 := fun r =>
-  if (r : ℕ) = a then ⟨b, Nat.lt_succ_of_le (Nat.le_of_eq (Nat.mul_one b).symm)⟩
-  else ⟨primitiveHeight a b F r,
-    Nat.lt_succ_of_le ((primitiveHeight_le a b F r).trans (Nat.le_of_eq (Nat.mul_one b).symm))⟩
-
-end HJO.Primitive
-
 namespace HJO.ParkingFunctions
 
 open Finset
@@ -505,49 +458,6 @@ noncomputable def gessel (K : Type*) [CommRing K] (n : ℕ) (S : Finset ℕ) :
 
 end HJO.ParkingFunctions
 
-namespace HJO.Gaps
-
-open Finset NumericalSemigroup PowerSeries
-open scoped QTheory PowerSeries.DiscreteTopology
-
-/-- The gap order: `g ≼ h` when the signed difference `h - g` lies in the semigroup generated
-by `a` and `b`. The natural-number equation below avoids truncated subtraction. -/
-def GapLE (a b g h : ℕ) : Prop := ∃ u v : ℕ, g + (u * a + v * b) = h
-
-/-- The totalized natural expression `a * b - a - b`. For coprime `1 < a < b` this is the
-Frobenius gap of `⟨a, b⟩`; no gap interpretation is asserted outside that domain. -/
-def frobeniusGap (a b : ℕ) : ℕ := a * b - a - b
-
-/-- An order filter of the gap set: a set of gaps closed upwards under the gap order. -/
-def IsOrderFilter (a b : ℕ) (F : Finset ℕ) : Prop :=
-  F ⊆ (finspan {a, b}).gaps ∧
-    ∀ g ∈ F, ∀ h ∈ (finspan {a, b}).gaps, GapLE a b g h → h ∈ F
-
-/-! ### The generalised Gaussian multinomial, in two guarded presentations
-
-For coprime `1 < a < b`, on the monotonicity cone with `n_f ≤ N` at the Frobenius gap `f`, both
-`multinomial` and `HJO.Finite.gaussianMultinomial` are the source expression
-`[N; n] = (q)_N / (q)_{N-n_f} * P_G(n)`, division being by constant-term-one power series. Off
-that domain they are guarded differently. The integer-vector one takes `N - n_f` in `ℤ` and
-reads a negative index as a zero extended inverse; its gap product likewise uses extended
-Pochhammer factors and inverses that vanish at negative indices. The natural-vector one
-truncates the subtraction, so its inverse factor at `n_f > N` is `1` rather than `0`. The two
-therefore need not agree when `n_f > N`, though a zero gap product can still make them. -/
-
-/-- The guarded integer-vector presentation of the generalised Gaussian multinomial `[N; n]`,
-taking the difference `N - n_f` in `ℤ`. -/
-noncomputable def multinomial (a b N : ℕ) (n : (finspan {a, b}).gaps → ℤ) : ℤ⟦X⟧ :=
-  (X; X)_N * HJO.extendedSelfQPochhammerInv ((N : ℤ) - HJO.extend n (frobeniusGap a b)) *
-    ∏ g : (finspan {a, b}).gaps, HJO.multiplicand _ a b n g
-
-/-- The flag extension of `n` at level `N`: `n j` at a gap `j`, `N` at a non-gap `j ≥ 0`, and
-`0` at a negative `j`. -/
-def flag (a b N : ℕ) (n : (finspan {a, b}).gaps → ℕ) (j : ℤ) : ℕ :=
-  if j < 0 then 0 else
-    if j.toNat ∈ (finspan {a, b}).gaps then HJO.extendNat n j.toNat else N
-
-end HJO.Gaps
-
 namespace HJO.Cylindric
 
 open PowerSeries
@@ -585,31 +495,20 @@ noncomputable def boundedGF (a b N : ℕ) : ℤ⟦X⟧ :=
   ∑' l : {l : ℕ → ℕ → ℕ // IsCylindric a (profile a b) l ∧ BoundedBy N l},
     X ^ cylVolume a l.val
 
-/-- `C_c(q)`, the volume generating function of the cylindric partitions with outgoing
-profile `c` and no bound on their entries. -/
-noncomputable def unboundedGF (a b : ℕ) : ℤ⟦X⟧ :=
-  ∑' l : {l : ℕ → ℕ → ℕ // IsCylindric a (profile a b) l}, X ^ cylVolume a l.val
-
-/-- `C_{c,≤N}(q)` is a genuine sum. A `tsum` is zero by definition when the family is not
-summable, so without this the statements above say nothing. -/
+/-- The cylindric partitions with outgoing profile `c` and every entry at most `N` are
+summable by volume. A `tsum` is zero by definition when the family is not summable, so
+without this `boundedGF` says nothing. -/
 theorem summable_boundedGF (a b N : ℕ) (ha : 0 < a) :
     Summable fun l : {l : ℕ → ℕ → ℕ // IsCylindric a (profile a b) l ∧ BoundedBy N l} =>
       (X : ℤ⟦X⟧) ^ cylVolume a l.val :=
   sorry
 
-/-- `C_c(q)` is a genuine sum, for the same reason. -/
+/-- The cylindric partitions with outgoing profile `c` and no bound on their entries are
+summable by volume. -/
 theorem summable_unboundedGF (a b : ℕ) (ha : 0 < a) :
     Summable fun l : {l : ℕ → ℕ → ℕ // IsCylindric a (profile a b) l} =>
       (X : ℤ⟦X⟧) ^ cylVolume a l.val :=
   sorry
-
-/-- `j_v = ⌊(v+1)d/a⌋ - ⌊vd/a⌋`, with `d = a + b`. For `a > 0` this is `1 + c_v`
-and is periodic in `v` with period `a`. -/
-def jShift (a b : ℕ) (v : ℕ) : ℕ := (v + 1) * (a + b) / a - v * (a + b) / a
-
-/-- `J_{v,s} = j_v + ⋯ + j_{v+s-1}`. The indices are cyclic, which needs no `mod` here
-because `jShift` is itself periodic with period `a`. -/
-def jSum (a b v s : ℕ) : ℕ := ∑ t ∈ range s, jShift a b (v + t)
 
 end HJO.Cylindric
 
@@ -618,10 +517,9 @@ namespace HJO.Finite
 open PowerSeries
 open scoped PowerSeries.DiscreteTopology QTheory
 
-/-- The natural-vector presentation of the generalized Gaussian multinomial `[N; 𝐧]_{q;G}`,
-taking the difference `N - n_f` by truncated natural subtraction; `HJO.Gaps.multinomial` is the
-integer-vector one, and the section there compares the two. The index set of `poly` requires
-`n_f ≤ N`, which is where the two agree. -/
+/-- The generalized Gaussian multinomial `[N; 𝐧]_{q;G}`: `(q)_N` divided by `(q)_{N - n_f}`,
+the difference taken by truncated natural subtraction, times the product of the gap
+multiplicands. The index set of `poly` requires `n_f ≤ N`. -/
 noncomputable def gaussianMultinomial (a b N : ℕ) (n : gaps(a, b) → ℕ) : ℤ⟦X⟧ :=
   (X; X)_N * invOfUnit (X; X)_(N - extendNat n (a * b - a - b)) 1 *
     ∏ i : gaps(a, b), multiplicand gaps(a, b) a b (fun j => (n j : ℤ)) i
@@ -642,77 +540,9 @@ theorem finite_index (a b N : ℕ) (hco : Nat.Coprime a b) (ha : 1 < a) (hab : a
 
 end HJO.Finite
 
-namespace HJO.Literature
-
-open scoped PowerSeries.DiscreteTopology QTheory
-
-/-! ## Huang's coercivity theorem as hypothesis
-
-Y. Huang, with an appendix by K. Lau, *A quadratic form generalization of rational dinv*,
-arXiv:2604.13238, Res. Math. Sci. **13** (2026) article 44, doi 10.1007/s40687-026-00631-0,
-**Theorem 1.3**: the effective positive definiteness of `Q` on the monotonicity cone. -/
-
-/-- **Huang Theorem 1.3**, specialized to integer vectors in the monotonicity cone:
-`|G| · Q(𝐧) ≥ ‖𝐧‖_∞²`, expressed as a bound on every coordinate square. The source proves this
-bound on the real cone and also proves nonnegativity of the associated bilinear form on pairs
-of cone vectors; those additional assertions are not included in this hypothesis. -/
-def HuangCoercivity : Prop :=
-  ∀ a b : ℕ, Nat.Coprime a b → 1 < a → a < b →
-    ∀ n : gaps(a, b) → ℤ, n ∈ cone a b →
-      ∀ i : gaps(a, b), n i ^ 2 ≤ (gaps(a, b)).card * Q a b n
-
-/-! ## The cylindric product as hypothesis
-
-O. Foda and T. A. Welsh, *Cylindric partitions, `W_r` characters and the
-Andrews–Gordon–Bressoud identities*, arXiv:1510.02213, J. Phys. A **49** (2016) 164004,
-doi 10.1088/1751-8113/49/16/164004, Sections 2–3, equivalently its normalized
-minimal-model form, together with Y. Huang, R. Jiang and A. Oblomkov, *Quot scheme of
-points on torus knot singularities*, arXiv:2608.16086v1: the standard product for the
-unbounded cylindric series, in its explicit form rather than as an identification with
-`charge a b`. -/
-
-/-- **The standard cylindric product**: `(q)_∞ C_c(q)` equals
-`(q^d;q^d)_∞^{a-1} / (q;q)_∞^{a-1} · ∏_{s=1}^{a-1} ∏_{v=0}^{a-1} (q^{J_{v,s}}; q^d)_∞`,
-with `d = a + b`. Assumed at every coprime pair satisfying `1 < a < b`. -/
-def CylindricProduct : Prop :=
-  ∀ a b : ℕ, Nat.Coprime a b → 1 < a → a < b →
-    (X; X)_∞ * Cylindric.unboundedGF a b =
-      (X ^ (a + b); X ^ (a + b))_∞ ^ (a - 1) * invOfUnit ((X; X)_∞) 1 ^ (a - 1) *
-        ∏ s ∈ Icc 1 (a - 1), ∏ v ∈ range a,
-          (X ^ Cylindric.jSum a b v s; X ^ (a + b))_∞
-
-end HJO.Literature
-
 namespace HJO.External
 
 open ParkingFunctions Paths
-
-/-! ### The gap poset and the quadratic form -/
-
-/-- **Huang, `A quadratic form generalization of rational dinv`, Theorem 1.1**: for every order
-filter `F` of the gap poset of `⟨a, b⟩`, the hook count of the primitive path of `F` is the value
-of the quadratic form at the indicator vector of `F`. -/
-def RankOneDinv : Prop :=
-  ∀ a b : ℕ, Nat.Coprime a b → 1 < a → a < b →
-    ∀ F : Finset ℕ, Gaps.IsOrderFilter a b F →
-      (hookCount (Primitive.primitivePath a b F) : ℤ) =
-        HJO.Q a b fun g => if (g : ℕ) ∈ F then 1 else 0
-
-/-- **Huang–Jiang–Oblomkov, `Quot scheme of points on torus knot singularities`, Lemma 5.9**
-(equation (5.20) with Remark 6.15, specialised to the gap poset): on the monotonicity cone with
-`n_f ≤ N` the generalised Gaussian multinomial factors over the gaps, the factor at `g` being the
-ordinary Gaussian binomial in the flag values, `(q)_m / ((q)_k (q)_{m-k})` with
-`m = n̂_{g+b} - n_{g-a}` and `k = n_g - n_{g-a}`, each division realised by the power series
-inverse. -/
-def GoodTraverse : Prop :=
-  ∀ a b : ℕ, Nat.Coprime a b → 1 < a → a < b →
-    ∀ (N : ℕ) (n : (finspan {a, b}).gaps → ℕ), (fun g => (n g : ℤ)) ∈ HJO.cone a b →
-      HJO.extendNat n (Gaps.frobeniusGap a b) ≤ N →
-        Gaps.multinomial a b N (fun g => (n g : ℤ)) =
-          ∏ g : (finspan {a, b}).gaps,
-            (X; X)_(Gaps.flag a b N n (((g : ℕ) : ℤ) + b) - HJO.extendNat n ((g : ℕ) - a)) *
-              invOfUnit (X; X)_(n g - HJO.extendNat n ((g : ℕ) - a)) 1 *
-              invOfUnit (X; X)_(Gaps.flag a b N n (((g : ℕ) : ℤ) + b) - n g) 1
 
 /-! ### The slope operators and the shuffle identity as hypotheses
 
@@ -790,49 +620,9 @@ def Shuffle (L : Type*) [Field L] [Algebra ℚ L] : Prop :=
                 ∑ π ∈ withReturns α.reverse a b N, (q ^ dinv π * u ^ area (path π)) •
                   gessel L (b * N) (ides π)
 
-/-! ### Sign extraction reads the full-descent coefficient
-
-I. G. Macdonald, *Symmetric Functions and Hall Polynomials*, 2nd ed., Chapter I §§3--4, with
-I. M. Gessel, *Multipartite P-partitions and inner products of skew Schur functions*,
-Contemp. Math. **34** (1984) 289--317: on degree `n` the sign extraction is the coefficient of
-`s_{(1ⁿ)}`, and a fundamental quasisymmetric function contributes to it exactly when its descent
-set is full. So an expansion of a homogeneous `f` of degree `n` in the fundamental quasisymmetric
-functions has `ε(f)` the sum of the coefficients of those with descent set `{1, …, n - 1}`. A
-descent set on degree `n` is a subset of `{1, …, n - 1}`, so only expansions whose indices `S i`
-are subsets of that set are read: an index outside it is not a descent set of degree `n` and the
-hypothesis says nothing about it. -/
-
-/-- **Sign extraction from a fundamental expansion**: `ε(f)` is the sum of the coefficients of
-the terms whose descent set is all of `{1, …, n - 1}`. -/
-def EpsilonGessel (L : Type*) [Field L] [Algebra ℚ L] : Prop :=
-  ∀ ι : Sym.Lambda L →ₐ[L] Sym.AlphabetSeries L, Sym.IsRealisation ι →
-    ∀ n : ℕ, 0 < n → ∀ (I : Type) (J : Finset I) (w : I → L) (S : I → Finset ℕ)
-      (f : Sym.Lambda L), MvPolynomial.IsWeightedHomogeneous (fun i => i + 1) f n →
-      (∀ i ∈ J, S i ⊆ Ico 1 n) →
-      ι f = ∑ i ∈ J, w i • gessel L n (S i) →
-      Sym.signExtract L f = ∑ i ∈ J with S i = Ico 1 n, w i
-
-/-! ### The elementary symmetric functions as sums of creation seeds
-
-F. Bergeron, A. M. Garsia, E. Leven and G. Xin, *Compositional (km,kn)-shuffle conjectures*,
-arXiv:1404.4616v2, Int. Math. Res. Not. IMRN **2016** no. 14, 4229--4270, **equation (1.6)**.
-The source's generic identity specializes to every `q ≠ 0`, since its coefficients are Laurent
-polynomials in `q`. The hypothesis below also covers `q = 0`, which is a valid totalized
-extension rather than a literal instance of the source's inverse notation: there `C_r = 0` for
-`r ≥ 2`, while `C_1` is the Bernstein operator with displacement `p_j ↦ p_j - z⁻ʲ`, which sends
-`e_n` to `e_{n+1}` because `∑_{j=0}^n (-1)^j e_{n-j} h_{j+1} = e_{n+1}`; only the all-ones
-composition survives, giving `C_1^N 1 = e_N`. -/
-
-/-- **The elementary function as a sum of creation seeds**: the `N`-th elementary symmetric
-function is the sum of the creation seeds `C_α 1` over the compositions `α` of `N`. -/
-def CreationExpansion (L : Type*) [Field L] [Algebra ℚ L] : Prop :=
-  ∀ (q : L) (N : ℕ), 0 < N →
-    Sym.elemSymm L N = ∑ c : Composition N, Sym.CopComp q c.blocks 1
-
 end HJO.External
 
 namespace HJO.PhiMul
-
 
 namespace Witness
 
@@ -854,19 +644,14 @@ end HJO.PhiMul
 
 namespace HJO.Challenge
 
-open HJO.External HJO.Literature HJO.PhiMul
+open HJO.External HJO.PhiMul
 
 /-- **The finite identity.** For coprime `1 < a < b` and every rank `N`, the HJO polynomial is
 `(q)_N` times the generating function of the balanced cylindric partitions with largest entry at
 most `N`. -/
 theorem thm_finite
-    (rankOne : RankOneDinv)
-    (goodTraverse : GoodTraverse)
-    (coercivity : HuangCoercivity)
     (collinear : CollinearCommutation Witness.Base)
     (shuffle : Shuffle Witness.Base)
-    (epsilonGessel : EpsilonGessel Witness.Base)
-    (creationExpansion : CreationExpansion Witness.Base)
     (a b : ℕ) (hco : Nat.Coprime a b) (ha : 1 < a) (hab : a < b) (N : ℕ) :
     HJO.Finite.poly a b N = (X; X)_N * HJO.Cylindric.boundedGF a b N :=
   sorry
@@ -874,14 +659,8 @@ theorem thm_finite
 /-- **The Huang–Jiang–Oblomkov conjecture.** The HJO series equals the HJO product, for every
 coprime `1 < a < b`. -/
 theorem thm_main
-    (rankOne : RankOneDinv)
-    (goodTraverse : GoodTraverse)
-    (coercivity : HuangCoercivity)
     (collinear : CollinearCommutation Witness.Base)
     (shuffle : Shuffle Witness.Base)
-    (epsilonGessel : EpsilonGessel Witness.Base)
-    (creationExpansion : CreationExpansion Witness.Base)
-    (cylindricProduct : CylindricProduct)
     (a b : ℕ) (hco : Nat.Coprime a b) (ha : 1 < a) (hab : a < b) :
     Conjecture a b :=
   sorry

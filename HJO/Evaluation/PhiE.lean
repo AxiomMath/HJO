@@ -8,6 +8,7 @@ module
 public import HJO.Symmetric.ThetaSymmetry
 public import HJO.Evaluation.PhiHom
 public import HJO.Defs
+public import HJO.Discharged.External
 
 /-! # The evaluation map on the elementary symmetric functions
 
@@ -136,7 +137,7 @@ index at least two vanishes, giving `Θ (elemSymm L N) = 0`, which contradicts t
 identity's nonzero path sum. -/
 theorem phi_elemSymm {q u : L} (spec : L →+* F) (hspec : spec u = 1)
     (Θ : Lambda L →ₐ[L] Module.End L (Lambda L)) (hΘ : IsSlopeHom a b q u Θ)
-    (shuffle : External.Shuffle L) (epsilonGessel : External.EpsilonGessel L)
+    (shuffle : External.Shuffle L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![q, u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L) (hι : IsRealisation ι) (hN : 0 < N)
@@ -145,7 +146,7 @@ theorem phi_elemSymm {q u : L} (spec : L →+* F) (hspec : spec u = 1)
       ∑ y ∈ (univ : Finset (Heights a b N)) with IsBelowDiagonal y, spec q ^ area y := by
   have ha0 : 0 < a := by omega
   have hb0 : 0 < b := by omega
-  have hgs : GesselSelection L := epsilonGessel
+  have hgs : GesselSelection L := ExternalDischarged.epsilonGessel L
   obtain ⟨hval, hswap⟩ := signExtract_elemSymm_isPoly_and_swap (shuffle a b hab ha hb q u hqu)
     (shuffle a b hab ha hb u q (algebraicIndependent_swap hqu)) hgs ι hι Θ hΘ ha0 hb0 hN hexp
     hexpSwap
@@ -163,14 +164,14 @@ vacuously: over a field `spec u = 1` forces `u = 1`, and there `Θ (elemSymm L N
 the assumed shuffle identity's nonzero path sum. -/
 theorem phi_elemSymm_eq_areaPoly {q u : L} (spec : L →+* F) (hspec : spec u = 1)
     (Θ : Lambda L →ₐ[L] Module.End L (Lambda L)) (hΘ : IsSlopeHom a b q u Θ)
-    (shuffle : External.Shuffle L) (epsilonGessel : External.EpsilonGessel L)
+    (shuffle : External.Shuffle L)
     (hab : Nat.Coprime a b) (ha : 1 < a) (hb : a < b)
     (hqu : AlgebraicIndependent ℤ ![q, u])
     (ι : Lambda L →ₐ[L] AlphabetSeries L) (hι : IsRealisation ι) (hN : 0 < N)
     (hexp : IsCreationExpansion N q) (hexpSwap : IsCreationExpansion N u)
     (g : PowerSeries ℤ →+* F) (hg : g PowerSeries.X = spec q) :
     Phi b spec Θ (elemSymm L N) = g (Paths.areaPoly a b N) := by
-  rw [phi_elemSymm spec hspec Θ hΘ shuffle epsilonGessel hab ha hb hqu ι hι hN hexp hexpSwap,
+  rw [phi_elemSymm spec hspec Θ hΘ shuffle hab ha hb hqu ι hι hN hexp hexpSwap,
     Paths.areaPoly, map_sum]
   exact Finset.sum_congr rfl fun y _ => by rw [map_pow, hg]
 

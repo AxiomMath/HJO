@@ -9,11 +9,11 @@ public import HJO
 
 /-! # The solution half of the comparator pair
 
-The challenge file grants the eight results quoted from the literature and asks for the finite
-identity and the conjecture, with the paper's own contribution assumed nowhere. Each statement it
-leaves open is restated here verbatim, under the same fully-qualified name, and proved from the
-development. The eight hypotheses are exactly those the challenge grants; nothing further is
-assumed.
+The challenge file grants the two results quoted from the literature -- the collinear commutation
+of the slope operators and the compositional rational shuffle identity -- and asks for the finite
+identity and the conjecture. Each statement it leaves open is restated here verbatim, under the
+same fully-qualified name, and proved from this library under those two hypotheses and nothing
+else: the six further results the challenge once granted are proved in `HJO/Discharged/`.
 
 This file cannot import the challenge file. Both name the same constants, so the two sets of
 declarations collide -- which is the evidence that the pair speaks one vocabulary.
@@ -68,35 +68,21 @@ open HJO.External HJO.Literature HJO.PhiMul
 `(q)_N` times the generating function of the balanced cylindric partitions with largest entry at
 most `N`. -/
 theorem thm_finite
-    (rankOne : RankOneDinv)
-    (goodTraverse : GoodTraverse)
-    (coercivity : HuangCoercivity)
     (collinear : CollinearCommutation Witness.Base)
     (shuffle : Shuffle Witness.Base)
-    (epsilonGessel : EpsilonGessel Witness.Base)
-    (creationExpansion : CreationExpansion Witness.Base)
     (a b : ℕ) (hco : Nat.Coprime a b) (ha : 1 < a) (hab : a < b) (N : ℕ) :
-    HJO.Finite.poly a b N = (X; X)_N * HJO.Cylindric.boundedGF a b N :=
-  by
-    rw [HJO.FiniteCanonical.poly_eq]
-    exact HJO.Final.finiteSeries_eq_qPochhammer_mul_boundedGF rankOne goodTraverse coercivity
-      collinear shuffle epsilonGessel creationExpansion hco ha hab N
+    HJO.Finite.poly a b N = (X; X)_N * HJO.Cylindric.boundedGF a b N := by
+  rw [HJO.FiniteCanonical.poly_eq]
+  exact HJO.Final.finiteSeries_eq_qPochhammer_mul_boundedGF collinear shuffle hco ha hab N
 
 /-- **The Huang–Jiang–Oblomkov conjecture.** The HJO series equals the HJO product, for every
 coprime `1 < a < b`. -/
 theorem thm_main
-    (rankOne : RankOneDinv)
-    (goodTraverse : GoodTraverse)
-    (coercivity : HuangCoercivity)
     (collinear : CollinearCommutation Witness.Base)
     (shuffle : Shuffle Witness.Base)
-    (epsilonGessel : EpsilonGessel Witness.Base)
-    (creationExpansion : CreationExpansion Witness.Base)
-    (cylindricProduct : CylindricProduct)
     (a b : ℕ) (hco : Nat.Coprime a b) (ha : 1 < a) (hab : a < b) :
     Conjecture a b :=
-  HJO.Final.conjecture rankOne goodTraverse coercivity collinear shuffle epsilonGessel
-    creationExpansion cylindricProduct hco ha hab
+  HJO.Final.conjecture collinear shuffle hco ha hab
 
 end HJO.Challenge
 
