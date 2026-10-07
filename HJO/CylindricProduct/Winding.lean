@@ -17,7 +17,7 @@ The trace of the winding shape
 `F(y) = Tr(Γ_-(y_1) ⋯ Γ_-(y_b) Q(q^d) Γ_+(x_1) ⋯ Γ_+(x_a))`
 
 satisfies `F(y) ∏_{i,j}(1 - x_i y_j) = F(q^d y)`. This file proves that recursion, one lowering
-argument at a time, in the inverse-free form the rest of the development uses.
+argument at a time, in the inverse-free form the rest of the library uses.
 
 To raise the argument of one lowering factor by `q^d`:
 

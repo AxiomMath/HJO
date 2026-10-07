@@ -334,13 +334,13 @@ theorem algebraicIndependent_swap {R : Type*} [CommRing R] {q u : R}
 
 end Swap
 
-/-! ### The external inputs -/
+/-! ### The hypotheses -/
 
-/-- Sign extraction reads off the total coefficient of the fundamental quasisymmetric functions
-with a full descent set, from an expansion indexed by descent sets, that is by subsets of
-`{1, …, n - 1}`. It is no longer an external input: `HJO.ExternalDischarged.epsilonGessel` proves
-it, and that is the proof every consumer of the lemmas below supplies. It is kept as a hypothesis
-so that this file is independent of that proof. -/
+/-- Sign extraction reads off the total coefficient of the fundamental quasisymmetric functions with
+a full descent set, from an expansion indexed by descent sets, that is by subsets of
+`{1, …, n - 1}`. `HJO.ExternalDischarged.epsilonGessel` proves it, and that is the proof every
+consumer of the lemmas below supplies. It is kept as a hypothesis so that this file is independent
+of that proof. -/
 def GesselSelection (L : Type*) [Field L] [Algebra ℚ L] : Prop :=
   ∀ (ι : Sym.Lambda L →ₐ[L] Sym.AlphabetSeries L), Sym.IsRealisation ι →
     ∀ n : ℕ, 0 < n → ∀ (I : Type) (J : Finset I) (w : I → L) (S : I → Finset ℕ)
@@ -356,8 +356,8 @@ variable {L : Type*} [Field L] [Algebra ℚ L]
 /-- The compositional rational shuffle identity at the parameters `(q, u)`: for a slope
 homomorphism at `(a, b)` for those parameters, the seed of a composition `β` is the generating
 function of the parking functions with return composition `β.reverse` by dinv, area and inverse
-descent set, the below-diagonal convention reading the blocks of the source's composition from the
-other end. This is an external input and is not proved here. -/
+descent set, the below-diagonal convention reading the blocks of the composition `β` from the
+other end. It is not proved here; it enters as a hypothesis. -/
 def ShuffleIdentity (a b : ℕ) (q u : L) : Prop :=
   ∀ (ι : Sym.Lambda L →ₐ[L] Sym.AlphabetSeries L), Sym.IsRealisation ι →
     ∀ Θ : Sym.Lambda L →ₐ[L] Module.End L (Sym.Lambda L), Sym.IsSlopeHom a b q u Θ →
@@ -369,9 +369,9 @@ def ShuffleIdentity (a b : ℕ) (q u : L) : Prop :=
               gessel L (b * M) (ides π)
 
 /-- The expansion of `e_N` over the compositions of `N` in the composite creation seeds at the
-parameter `v`. It is no longer an external input: `HJO.ExternalDischarged.creationExpansion` proves
-it, and that is the proof every consumer of the lemmas below supplies. It is kept as a hypothesis
-so that this file is independent of that proof. -/
+parameter `v`. `HJO.ExternalDischarged.creationExpansion` proves it, and that is the proof every
+consumer of the lemmas below supplies. It is kept as a hypothesis so that this file is independent
+of that proof. -/
 def IsCreationExpansion (N : ℕ) (v : L) : Prop :=
   Sym.elemSymm L N = ∑ c : Composition N, Sym.CopComp v c.blocks 1
 

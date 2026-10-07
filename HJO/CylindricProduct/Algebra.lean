@@ -88,6 +88,7 @@ theorem summable_kmul_pair {K L M : Kernel} (hK : StepBdd K) (hL : StepBdd L) (_
 /-- **The kernel product is associative on step-bounded kernels.** Both bracketings are the sum of
 `K(λ,τ)L(τ,σ)M(σ,ν)` over the pair of intermediate partitions, one summing `τ` first and the other
 `σ`. -/
+@[hjo "lem_tame_assoc"]
 theorem kmul_assoc {K L M : Kernel} (hK : StepBdd K) (hL : StepBdd L) (hM : StepBdd M) :
     kmul (kmul K L) M = kmul K (kmul L M) := by
   funext lam nu

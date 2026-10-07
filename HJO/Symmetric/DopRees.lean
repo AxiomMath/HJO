@@ -5,6 +5,7 @@ Authors: Kenny Lau
 -/
 module
 
+public import Mathlib.Algebra.CharP.Algebra
 public import HJO.Symmetric.ReesClosed
 
 /-! # The basic operators lie in the order filtration
@@ -14,6 +15,14 @@ most `d`: the chain rule in `w` writes it through the coefficients of lower degr
 one partial derivative, because each application of the displacement costs at least one power of
 `w`. Pairing those coefficients with the elementary symmetric functions presents the basic
 operator as a locally finite sum of operators of increasing differential order.
+
+## Implementation notes
+
+The displacement and its coefficient operators ask nothing of the scalars beyond a commutative
+ring, and are stated that way: the triviality of the displacement at a vanishing coefficient is
+read by the Carlsson--Mellit layer over a coefficient ring that is not a field. It is the order
+filtration itself, and the inverses the chain rule divides by, that want a field of characteristic
+zero.
 -/
 
 @[expose] public section
@@ -24,44 +33,60 @@ namespace HJO.DopRees
 
 open HJO.Sym HJO.ReesClosed
 
-variable {L : Type*} [Field L]
+section CommRing
+
+variable {K : Type*} [CommRing K]
 
 /-- The scalar multiplying `w ^ (i + 1)` in the image of the generator `p_{i+1}` under the
 plethystic displacement. -/
-def shiftScalar (q u : L) (i : ℕ) : L := (1 - q ^ (i + 1)) * (1 - u ^ (i + 1))
+def shiftScalar (q u : K) (i : ℕ) : K := (1 - q ^ (i + 1)) * (1 - u ^ (i + 1))
 
 /-- The weight attached to the index `i` by the chain rule for the displacement in `w`. -/
-def chainScalar (q u : L) (i : ℕ) : L := (i + 1 : L) * shiftScalar q u i
+def chainScalar (q u : K) (i : ℕ) : K := (i + 1 : K) * shiftScalar q u i
 
-/-- The coefficient of `wᵈ` of the plethystic displacement, as an `L`-linear endomorphism of the
+/-- The coefficient of `wᵈ` of the plethystic displacement, as a `K`-linear endomorphism of the
 ring of symmetric functions. -/
-noncomputable def shiftCoeff (q u : L) (d : ℕ) : Module.End L (Lambda L) where
+noncomputable def shiftCoeff (q u : K) (d : ℕ) : Module.End K (Lambda K) where
   toFun f := (plethShift q u f).coeff d
   map_add' f g := by rw [map_add, Polynomial.coeff_add]
   map_smul' a f := by simp [map_smul]
 
 /-- The coefficient operator evaluates to the corresponding coefficient of the displacement. -/
-@[simp] theorem shiftCoeff_apply (q u : L) (d : ℕ) (f : Lambda L) :
+@[simp] theorem shiftCoeff_apply (q u : K) (d : ℕ) (f : Lambda K) :
     shiftCoeff q u d f = (plethShift q u f).coeff d := rfl
 
 /-- The displacement of the generator `p_{n+1}`. -/
-theorem plethShift_X (q u : L) (n : ℕ) :
+theorem plethShift_X (q u : K) (n : ℕ) :
     plethShift q u (MvPolynomial.X n) =
       Polynomial.C (MvPolynomial.X n) +
         Polynomial.C (MvPolynomial.C (shiftScalar q u n)) * Polynomial.X ^ (n + 1) := by
   simp [plethShift, powerSum, shiftScalar]
 
-/-- At `u = 1` the plethystic displacement is trivial. -/
-theorem plethShift_eq_C (q : L) {u : L} (hu : u = 1) (f : Lambda L) :
+/-- The displacement of a constant is that constant. -/
+theorem plethShift_C (q u : K) (a : K) :
+    plethShift q u (MvPolynomial.C a) = Polynomial.C (MvPolynomial.C a) := by
+  simp [plethShift]
+
+/-- The plethystic displacement is the constant inclusion `f ↦ C f` as soon as all of its
+displacement coefficients vanish: the displaced generator `p_{i+1}` then loses its `w ^ (i + 1)`
+term, and the generators are left where they are. The coefficient `shiftScalar q u i` is symmetric
+in `q` and `u`, so this covers `q = 1` and `u = 1` alike. -/
+theorem plethShift_eq_C_of_forall_shiftScalar_eq_zero {q u : K}
+    (h : ∀ i, shiftScalar q u i = 0) (f : Lambda K) :
     plethShift q u f = Polynomial.C f := by
-  have h : (plethShift q u).toRingHom = (Polynomial.C : Lambda L →+* Polynomial (Lambda L)) :=
-    MvPolynomial.ringHom_ext (fun r => by simp)
-      fun i => by simp [plethShift_X, hu, shiftScalar]
-  exact RingHom.congr_fun h f
+  have key : (plethShift q u).toRingHom = (Polynomial.C : Lambda K →+* Polynomial (Lambda K)) :=
+    MvPolynomial.ringHom_ext (fun r => by simp) fun i => by simp [plethShift_X, h i]
+  exact RingHom.congr_fun key f
+
+/-- At `u = 1` the plethystic displacement is trivial: one of the two vanishing faces of
+`shiftScalar`, and the one `dop_eq_mulLeft` reads. -/
+theorem plethShift_eq_C (q : K) {u : K} (hu : u = 1) (f : Lambda K) :
+    plethShift q u f = Polynomial.C f :=
+  plethShift_eq_C_of_forall_shiftScalar_eq_zero (fun i => by simp [shiftScalar, hu]) f
 
 /-- The coefficient of `wᵈ` in the displacement of `f * p_{n+1}`: the undisplaced generator
 contributes the same degree, and the displaced one shifts the degree by `n + 1`. -/
-theorem shiftCoeff_mul_X (q u : L) (g : Lambda L) (n d : ℕ) :
+theorem shiftCoeff_mul_X (q u : K) (g : Lambda K) (n d : ℕ) :
     shiftCoeff q u d (g * MvPolynomial.X n) =
       shiftCoeff q u d g * MvPolynomial.X n
         + (if n + 1 ≤ d then shiftCoeff q u (d - (n + 1)) g else 0)
@@ -73,7 +98,7 @@ theorem shiftCoeff_mul_X (q u : L) (g : Lambda L) (n d : ℕ) :
   split_ifs <;> simp
 
 /-- The partial derivative of `g * p_{n+1}`. -/
-theorem pderiv_mul_X (i n : ℕ) (g : Lambda L) :
+theorem pderiv_mul_X (i n : ℕ) (g : Lambda K) :
     MvPolynomial.pderiv i (g * MvPolynomial.X n)
       = MvPolynomial.pderiv i g * MvPolynomial.X n + (if i = n then g else 0) := by
   rw [MvPolynomial.pderiv_mul]
@@ -84,8 +109,8 @@ theorem pderiv_mul_X (i n : ℕ) (g : Lambda L) :
 /-- The chain rule for the displacement in the variable `w`: differentiating once in `w` trades a
 power of `w` for a partial derivative, so the coefficient of `w ^ (m + 1)` is a finite
 combination of the coefficients of lower degree applied to first derivatives. -/
-theorem succ_smul_shiftCoeff (q u : L) : ∀ (f : Lambda L) (m : ℕ),
-    ((m : L) + 1) • shiftCoeff q u (m + 1) f
+theorem succ_smul_shiftCoeff (q u : K) : ∀ (f : Lambda K) (m : ℕ),
+    ((m : K) + 1) • shiftCoeff q u (m + 1) f
       = ∑ i ∈ range (m + 1), chainScalar q u i •
           shiftCoeff q u (m - i) (MvPolynomial.pderiv i f) := by
   intro f
@@ -112,7 +137,7 @@ theorem succ_smul_shiftCoeff (q u : L) : ∀ (f : Lambda L) (m : ℕ),
         rw [pderiv_mul_X, map_add, shiftCoeff_mul_X, smul_add, smul_add]
       have hS1 : ∑ i ∈ range (m + 1), chainScalar q u i •
             (shiftCoeff q u (m - i) (MvPolynomial.pderiv i g) * MvPolynomial.X n)
-          = (((m : L) + 1) • shiftCoeff q u (m + 1) g) * MvPolynomial.X n := by
+          = (((m : K) + 1) • shiftCoeff q u (m + 1) g) * MvPolynomial.X n := by
         rw [ih m, Finset.sum_mul]
         exact Finset.sum_congr rfl fun i _ => (smul_mul_assoc _ _ _).symm
       have hS3 : ∑ i ∈ range (m + 1), chainScalar q u i •
@@ -131,7 +156,7 @@ theorem succ_smul_shiftCoeff (q u : L) : ∀ (f : Lambda L) (m : ℕ),
             ((if n + 1 ≤ m - i then
                 shiftCoeff q u (m - i - (n + 1)) (MvPolynomial.pderiv i g) else 0)
               * MvPolynomial.C (shiftScalar q u n))
-          = (((m - n : ℕ) : L) • shiftCoeff q u (m - n) g)
+          = (((m - n : ℕ) : K) • shiftCoeff q u (m - n) g)
               * MvPolynomial.C (shiftScalar q u n) := by
         by_cases hmn : m ≤ n
         · rw [Nat.sub_eq_zero_of_le hmn, Finset.sum_eq_zero]
@@ -171,7 +196,7 @@ theorem succ_smul_shiftCoeff (q u : L) : ∀ (f : Lambda L) (m : ℕ),
       rw [shiftCoeff_mul_X, smul_add, ← smul_mul_assoc, hsplit, hS1, hS2, hS3, add_assoc]
       congr 1
       simp only [add_le_add_iff_right, Nat.add_sub_add_right]
-      have hAC : ∀ A : Lambda L, A * MvPolynomial.C (shiftScalar q u n)
+      have hAC : ∀ A : Lambda K, A * MvPolynomial.C (shiftScalar q u n)
           = shiftScalar q u n • A := fun A => by
         rw [MvPolynomial.smul_eq_C_mul, mul_comm]
       split_ifs with h
@@ -184,23 +209,27 @@ theorem succ_smul_shiftCoeff (q u : L) : ∀ (f : Lambda L) (m : ℕ),
 
 /-- The displacement is the identity modulo `w`, so its constant coefficient is the identity
 operator. -/
-theorem shiftCoeff_zero_apply (q u : L) (f : Lambda L) : shiftCoeff q u 0 f = f := by
-  have h : (Polynomial.evalRingHom (0 : Lambda L)).comp (plethShift q u).toRingHom
-      = RingHom.id (Lambda L) :=
+theorem shiftCoeff_zero_apply (q u : K) (f : Lambda K) : shiftCoeff q u 0 f = f := by
+  have h : (Polynomial.evalRingHom (0 : Lambda K)).comp (plethShift q u).toRingHom
+      = RingHom.id (Lambda K) :=
     MvPolynomial.ringHom_ext (fun r => by simp) fun i => by simp [plethShift_X]
   simpa [Polynomial.coeff_zero_eq_eval_zero] using RingHom.congr_fun h f
 
 /-- The constant coefficient of the displacement is the identity operator. -/
-theorem shiftCoeff_zero (q u : L) : shiftCoeff q u 0 = 1 :=
+theorem shiftCoeff_zero (q u : K) : shiftCoeff q u 0 = 1 :=
   LinearMap.ext (shiftCoeff_zero_apply q u)
 
 /-- The chain rule as an identity between operators. -/
-theorem succ_smul_shiftCoeff_eq (q u : L) (m : ℕ) :
-    ((m : L) + 1) • shiftCoeff q u (m + 1)
-      = ∑ i ∈ range (m + 1), chainScalar q u i • (shiftCoeff q u (m - i) * pderivEnd L i) := by
+theorem succ_smul_shiftCoeff_eq (q u : K) (m : ℕ) :
+    ((m : K) + 1) • shiftCoeff q u (m + 1)
+      = ∑ i ∈ range (m + 1), chainScalar q u i • (shiftCoeff q u (m - i) * pderivEnd K i) := by
   refine LinearMap.ext fun f => ?_
   rw [LinearMap.smul_apply, LinearMap.sum_apply, succ_smul_shiftCoeff q u f m]
   exact Finset.sum_congr rfl fun i _ => rfl
+
+end CommRing
+
+variable {L : Type*} [Field L]
 
 /-- An operator of differential order zero lies in the order filtration: its expansion has the
 single term of index zero. -/

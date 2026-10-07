@@ -24,7 +24,7 @@ Three kernels are singled out: the lowering operator `Γ_-(y)`, supported on the
 `(λ, ν)` with `λ/ν` a horizontal strip, the raising operator `Γ_+(x)`, supported on the pairs with
 `ν/λ` a horizontal strip, and the diagonal grading `Q(u)`.
 
-The **sorted** transfer kernel is the one this development uses. The slot-ordered product is not
+The **sorted** transfer kernel is the one this library uses. The slot-ordered product is not
 available: keeping one grading per slot forces the strip factors to carry the argument `1`, and
 `Γ_±(1)` is not summable. Sorting the gradings out of the way produces the positive powers
 `y_s = q^{s+1}` and `x_{s'} = q^{d-1-s'}`, at the cost of a prefactor -- which is why the sorted

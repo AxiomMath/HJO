@@ -153,13 +153,19 @@ theorem X_pow_dvd_tsum {ι : Type*} {f : ι → ℤ⟦X⟧} {k : ℕ} (hf : Summ
 
 /-- A kernel is **step-bounded** when its entry at `(λ, ν)` is divisible by `q^{| |λ| - |ν| |}`.
 All three of `Γ_-`, `Γ_+` and `Q` are step-bounded when their argument is a positive power
-of `q`. -/
+of `q`: by `PowerSeries.X_pow_dvd_iff` the divisibility says that a nonzero coefficient of `q ^ n`
+in `K λ ν` forces `| |λ| - |ν| | ≤ n`. -/
+@[hjo "def_tame_kernel"]
 def StepBdd (K : Kernel) : Prop := ∀ lam nu, (X : ℤ⟦X⟧) ^ sizeDist lam nu ∣ K lam nu
 
 /-- A kernel is **grade-bounded** when its entry at `(λ, ν)` is divisible by `q^{|λ|}`. A product
-containing a grading kernel is grade-bounded, and that is what makes its trace summable. -/
+containing a grading kernel is grade-bounded, and that is what makes its trace summable. This is
+the *coercive* kernel: by `PowerSeries.X_pow_dvd_iff` the divisibility says that a
+nonzero coefficient of `q ^ n` in `K λ ν` forces `|λ| ≤ n`. -/
+@[hjo "def_coercive_kernel"]
 def GradeBdd (K : Kernel) : Prop := ∀ lam nu, (X : ℤ⟦X⟧) ^ lam.size ∣ K lam nu
 
+@[hjo "lem_gamma_tame"]
 theorem StepBdd.gammaMinus {m : ℕ} (hm : 1 ≤ m) : StepBdd (gammaMinus (X ^ m)) := by
   intro lam nu
   by_cases h : IsHStrip lam nu
@@ -171,6 +177,7 @@ theorem StepBdd.gammaMinus {m : ℕ} (hm : 1 ≤ m) : StepBdd (gammaMinus (X ^ m
       _ ≤ m * (lam.size - nu.size) := Nat.le_mul_of_pos_left _ hm
   · rw [gammaMinus_of_not h]; exact dvd_zero _
 
+@[hjo "lem_gamma_tame"]
 theorem StepBdd.gammaPlus {m : ℕ} (hm : 1 ≤ m) : StepBdd (gammaPlus (X ^ m)) := by
   intro lam nu
   by_cases h : IsHStrip nu lam
@@ -182,6 +189,7 @@ theorem StepBdd.gammaPlus {m : ℕ} (hm : 1 ≤ m) : StepBdd (gammaPlus (X ^ m))
       _ ≤ m * (nu.size - lam.size) := Nat.le_mul_of_pos_left _ hm
   · rw [gammaPlus_of_not h]; exact dvd_zero _
 
+@[hjo "lem_grading_tame"]
 theorem StepBdd.grading (u : ℤ⟦X⟧) : StepBdd (CylindricProduct.grading u) := by
   intro lam nu
   by_cases h : lam = nu
@@ -194,6 +202,7 @@ theorem StepBdd.kone : StepBdd CylindricProduct.kone := by
   · subst h; simp
   · simp [CylindricProduct.kone, h]
 
+@[hjo "lem_grading_coercive"]
 theorem GradeBdd.grading {m : ℕ} (hm : 1 ≤ m) : GradeBdd (CylindricProduct.grading (X ^ m)) := by
   intro lam nu
   by_cases h : lam = nu
@@ -205,12 +214,14 @@ theorem GradeBdd.grading {m : ℕ} (hm : 1 ≤ m) : GradeBdd (CylindricProduct.g
 /-! ### The bounds propagate through an iterated product -/
 
 /-- The intermediate sums of an iterated product of step-bounded kernels are summable. -/
+@[hjo "lem_tame_product_defined"]
 theorem summable_kmul {K L : Kernel} (hK : StepBdd K) (_hL : StepBdd L) (lam nu : Part) :
     Summable fun tau => K lam tau * L tau nu :=
   summable_of_dvd_of_finite (g := fun tau => sizeDist lam tau)
     (fun tau => Dvd.dvd.mul_right (hK lam tau) _) (finite_sizeDist_le lam)
 
 /-- The product of two step-bounded kernels is step-bounded. -/
+@[hjo "lem_tame_product_tame"]
 theorem StepBdd.kmul {K L : Kernel} (hK : StepBdd K) (hL : StepBdd L) :
     StepBdd (CylindricProduct.kmul K L) := by
   intro lam nu
@@ -230,6 +241,7 @@ theorem StepBdd.klist {Ks : List Kernel} (h : ∀ K ∈ Ks, StepBdd K) :
       (ih fun L hL => h L (List.mem_cons_of_mem _ hL))
 
 /-- A product of a grade-bounded kernel with a step-bounded one is grade-bounded. -/
+@[hjo "lem_tame_coercive_product"]
 theorem GradeBdd.kmul_left {K L : Kernel} (hK : GradeBdd K) (hKs : StepBdd K)
     (hL : StepBdd L) :
     GradeBdd (CylindricProduct.kmul K L) := by
@@ -241,6 +253,7 @@ theorem GradeBdd.kmul_left {K L : Kernel} (hK : GradeBdd K) (hKs : StepBdd K)
 /-- A product of a step-bounded kernel with a grade-bounded one is grade-bounded: the steps from
 `λ` to the intermediate partition `τ` contribute `q^{||τ|-|λ||}` and the tail contributes
 `q^{|τ|}`, and those exponents together are at least `|λ|`. -/
+@[hjo "lem_tame_coercive_product"]
 theorem GradeBdd.kmul_right {K L : Kernel} (hK : StepBdd K) (hL : GradeBdd L) (hLs : StepBdd L) :
     GradeBdd (CylindricProduct.kmul K L) := by
   intro lam nu

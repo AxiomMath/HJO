@@ -5,6 +5,11 @@ Authors: Kenny Lau
 -/
 module
 
+public import Mathlib.RingTheory.TotallySplit
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.FieldTheory.RatFunc.Basic
 public import HJO.Symmetric.ReesClosed
 
 /-! # Symmetric functions over a coefficient ring, and the specialisation setting
@@ -26,7 +31,7 @@ A model section instantiates the setting with `R = ℚ[u] ⊂ L = ℚ(u)` and `s
 hypotheses nor the conclusion are vacuous. A final section bounds the reach of the filtration:
 the total derivation sending every generator to `1` has no differential order at all.
 
-The order filtration used by the development is `HJO.DiffOrder.ReesRegComm`, which tracks the
+The order filtration used in this library is `HJO.DiffOrder.ReesRegComm`, which tracks the
 coefficient ring through the commutator filtration.
 -/
 

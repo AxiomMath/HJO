@@ -7,9 +7,7 @@ This is a Lean formalization of the Huang–Jiang–Oblomkov conjecture on the p
 ## Main Results
 
 * The finite identity: for coprime `1 < a < b` and every `N`, the HJO polynomial is `(q)_N` times the generating function of the balanced cylindric partitions with largest entry at most `N`.
-* The Huang–Jiang–Oblomkov conjecture for every coprime `1 < a < b`.
-
-Both assume two results quoted from the literature: the collinear commutation of the slope operators, and the compositional rational shuffle identity.
+* The Huang–Jiang–Oblomkov conjecture for every coprime pair `a, b`.
 
 See [§Formal Challenge](#formal-challenge) for a formal certificate.
 
@@ -32,4 +30,4 @@ https://github.com/leanprover/comparator to install `comparator`. Then, run the 
 lake env comparator Comparator/comparator.json
 ```
 
-This repository has been locally verified with the comparator.
+This version of the repository was run against the comparator on 2026-10-07, which reported `Your solution is okay!`.

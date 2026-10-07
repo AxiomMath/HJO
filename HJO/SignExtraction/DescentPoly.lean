@@ -55,8 +55,8 @@ theorem eval_descentPoly_of_factorial_mul {n j : ℕ} {x v : K}
   rw [eval_descentPoly, h, ← mul_assoc, inv_factorial_mul_factorial, one_mul]
 
 /-- **The roots of the descent polynomial**: `D_{n,j}` vanishes at every integer `x` of the window
-`j - n + 1 ≤ x ≤ j`, the factor indexed by `r = j - x` being zero there. The source's `n ≥ 1` is
-not needed: at `n = 0` the window is empty, so the hypotheses cannot both hold. -/
+`j - n + 1 ≤ x ≤ j`, the factor indexed by `r = j - x` being zero there. The hypothesis `n ≥ 1`
+is not needed: at `n = 0` the window is empty, so the hypotheses cannot both hold. -/
 @[hjo "lem_descent_poly_root"]
 theorem eval_descentPoly_intCast_eq_zero (n : ℕ) (j : ℕ) {x : ℤ}
     (hlow : (j : ℤ) - n + 1 ≤ x) (hhigh : x ≤ (j : ℤ)) :
@@ -103,8 +103,8 @@ theorem eval_descentPoly_neg_one_succ (n : ℕ) :
 
 /-- **The descent polynomial counts at a non-negative integer**: for `j ≤ m` the value
 `D_{n,j}(m)` is the image in `K` of the shifted binomial coefficient `C(m - j + n - 1, n)`, the
-product `∏_{r < n} (m - j + r)` being the ascending factorial of `m - j`. The source's `n ≥ 1` is
-not needed: at `n = 0` both sides are `1`. -/
+product `∏_{r < n} (m - j + r)` being the ascending factorial of `m - j`. The hypothesis `n ≥ 1`
+is not needed: at `n = 0` both sides are `1`. -/
 @[hjo "lem_descent_poly_binom"]
 theorem eval_descentPoly_natCast (n : ℕ) {j m : ℕ} (hjm : j ≤ m) :
     (descentPoly K n j).eval (m : K) = (((m - j + n - 1).choose n : ℕ) : K) := by

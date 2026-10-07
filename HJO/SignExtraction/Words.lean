@@ -7,9 +7,7 @@ module
 
 public import Mathlib.Algebra.Order.Antidiag.FinsuppEquiv
 public import Mathlib.Data.List.GetD
-public import Mathlib.Data.List.Sort
 public import Mathlib.Data.Multiset.Sort
-public import Mathlib.Order.Fin.Basic
 public import HJO.SignExtraction.DescentPoly
 public meta import HJO.Attr
 
@@ -25,10 +23,10 @@ descent polynomial `D_{n, #S}` at the number of letters, which is the fact the s
 route uses.
 
 The `0`-based conventions of `HJO.Sym.IsAscendingWord` are in force: a word of length `n` is a
-tuple `Fin n → ℕ` whose letters are indexed from `0`, so the source's bound `i_n ≤ m` reads
-`w k < m` and the source's lower bound `1 ≤ i_1` is vacuous. The source's `i_n ≥ 1 + #S`
-correspondingly reads `w (last) ≥ #S`. The descent set stays `1`-based: the source's step
-`j ∈ S` is the step from position `j - 1` to position `j`.
+tuple `Fin n → ℕ` whose letters are indexed from `0`, so the `1`-based bound `i_n ≤ m` reads
+`w k < m` and the `1`-based lower bound `1 ≤ i_1` is vacuous. The `1`-based `i_n ≥ 1 + #S`
+correspondingly reads `w (last) ≥ #S`. The descent set stays `1`-based: the step `j ∈ S` is the
+step from position `j - 1` to position `j`.
 -/
 
 @[expose] public section
@@ -135,8 +133,8 @@ theorem card_toMultiset_of_mem_finsuppAntidiag {m n : ℕ} {d : ℕ →₀ ℕ}
 /-! ### The strict steps of a descent set -/
 
 /-- The number of strict steps a descent set `S` prescribes at or before the `0`-based position
-`k`, that is the source's `s_{k+1} = #{s ∈ S : s < k + 1}`. Shifting a word down by this count at
-each position is the bijection that removes the strict steps. -/
+`k`, that is the `1`-based count `s_{k+1} = #{s ∈ S : s < k + 1}`. Shifting a word down by this
+count at each position is the bijection that removes the strict steps. -/
 def stepCount (S : Finset ℕ) (k : ℕ) : ℕ := #{s ∈ S | s ≤ k}
 
 section StepCount
@@ -183,6 +181,21 @@ theorem stepCount_succ_of_notMem {k : ℕ} (h : k + 1 ∉ S) :
   · rintro ⟨hsS, hsk⟩
     exact ⟨hsS, by omega⟩
 
+/-- **A step is where the count grows**: the number of strict steps at or before `k + 1` exceeds
+the number at or before `k` exactly when `k + 1` is a step of the descent set. -/
+theorem stepCount_lt_stepCount_succ_iff {k : ℕ} :
+    stepCount S k < stepCount S (k + 1) ↔ k + 1 ∈ S := by
+  by_cases h : k + 1 ∈ S
+  · simp [stepCount_succ_of_mem h, h]
+  · simp [stepCount_succ_of_notMem h, h]
+
+/-- The count grows across the step from a position `k` into the position `l` after it exactly when
+`l` is a step of the descent set. This is `stepCount_lt_stepCount_succ_iff` with the step presented
+as an equation between positions, which is the form `IsAscendingWord` states its strict steps in. -/
+theorem stepCount_lt_stepCount_iff_of_succ {k l : ℕ} (hkl : k + 1 = l) :
+    stepCount S k < stepCount S l ↔ l ∈ S := by
+  subst hkl; exact stepCount_lt_stepCount_succ_iff
+
 /-- The step count never exceeds the size of the descent set. -/
 theorem stepCount_le_card (k : ℕ) : stepCount S k ≤ #S :=
   card_filter_le _ _
@@ -191,6 +204,19 @@ theorem stepCount_le_card (k : ℕ) : stepCount S k ≤ #S :=
 theorem stepCount_mono : Monotone (stepCount S) := fun _ _ hkl =>
   card_le_card fun _ hs =>
     mem_filter.mpr ⟨(mem_filter.mp hs).1, le_trans (mem_filter.mp hs).2 hkl⟩
+
+/-- **At most one step per position**: the count grows by at most `d` across `d` positions, a step
+counted at or before `l = k + d` being either counted at or before `k` or one of the `d` members of
+`Finset.Ioc k l`. -/
+theorem stepCount_le_stepCount_add {k d l : ℕ} (hkl : k + d = l) :
+    stepCount S l ≤ stepCount S k + d := by
+  have hsub : {s ∈ S | s ≤ l} ⊆ {s ∈ S | s ≤ k} ∪ Ioc k l := fun s hs => by
+    simp only [mem_filter, mem_union, mem_Ioc] at hs ⊢
+    exact (Nat.lt_or_ge k s).elim (fun h => Or.inr ⟨h, hs.2⟩) fun h => Or.inl ⟨hs.1, h⟩
+  rw [stepCount, stepCount]
+  refine le_trans (card_le_card hsub) (le_trans (card_union_le _ _) ?_)
+  rw [Nat.card_Ioc]
+  omega
 
 /-- All the strict steps of a descent set on degree `n + 1` are prescribed by its last
 position. -/
@@ -205,8 +231,8 @@ end StepCount
 /-! ### A word ends above its number of strict steps -/
 
 /-- Every position of an `S`-ascending word carries a letter at least the number of strict steps
-prescribed at or before it: each strict step raises the letter by one, and the letters start at
-`0`. -/
+prescribed at or before it: the letters start at `0`, and across one position the count rises by at
+most one and only where the letter itself rises strictly. -/
 theorem IsAscendingWord.stepCount_le {n : ℕ} {S : Finset ℕ} {w : Fin n → ℕ}
     (hw : IsAscendingWord n S w) (hS : S ⊆ Ico 1 n) :
     ∀ (k : ℕ) (hk : k < n), stepCount S k ≤ w ⟨k, hk⟩ := by
@@ -220,17 +246,15 @@ theorem IsAscendingWord.stepCount_le {n : ℕ} {S : Finset ℕ} {w : Fin n → �
     intro hk
     have hkn : k < n := by omega
     have hle : w ⟨k, hkn⟩ ≤ w ⟨k + 1, hk⟩ := hw.monotone (by simp [Fin.le_def])
+    have hlt : stepCount S k < stepCount S (k + 1) → w ⟨k, hkn⟩ < w ⟨k + 1, hk⟩ := fun h =>
+      hw.lt_of_mem _ _ rfl (stepCount_lt_stepCount_succ_iff.mp h)
+    have hgap : stepCount S (k + 1) ≤ stepCount S k + 1 := stepCount_le_stepCount_add rfl
     have hih := ih hkn
-    by_cases hmem : k + 1 ∈ S
-    · have hlt : w ⟨k, hkn⟩ < w ⟨k + 1, hk⟩ := hw.lt_of_mem _ _ rfl hmem
-      rw [stepCount_succ_of_mem hmem]
-      omega
-    · rw [stepCount_succ_of_notMem hmem]
-      omega
+    omega
 
 /-- **A word ends above its number of strict steps**: the last letter of an `S`-ascending word of
-length `n + 1` is at least `#S`. The letters being indexed from `0`, this is the source's
-`i_n ≥ 1 + #S`. -/
+length `n + 1` is at least `#S`. The letters being indexed from `0`, this is the `1`-based
+bound `i_n ≥ 1 + #S`. -/
 @[hjo "lem_word_last_ge"]
 theorem IsAscendingWord.card_le_last {n : ℕ} {S : Finset ℕ} {w : Fin (n + 1) → ℕ}
     (hw : IsAscendingWord (n + 1) S w) (hS : S ⊆ Ico 1 (n + 1)) : #S ≤ w (Fin.last n) := by
@@ -252,7 +276,7 @@ theorem boundedWords_eq_empty {n : ℕ} {S : Finset ℕ} (hS : S ⊆ Ico 1 (n + 
 
 /-- **Counting weakly increasing words**: the weakly increasing words of length `n` in the first
 `M` letters are as many as the exponent vectors of total degree `n` supported there, namely
-`C(M + n - 1, n)`. The source's `n ≥ 1` is not needed: at `n = 0` both sides are `1`. -/
+`C(M + n - 1, n)`. The hypothesis `n ≥ 1` is not needed: at `n = 0` both sides are `1`. -/
 @[hjo "lem_weak_word_card"]
 theorem card_boundedWords_empty (n M : ℕ) :
     #(boundedWords n ∅ M) = (M + n - 1).choose n := by
@@ -290,17 +314,11 @@ theorem isAscendingWord_sub_stepCount {w : Fin n → ℕ} (hw : IsAscendingWord 
   monotone := by
     refine monotone_of_le_succ fun k l hkl => ?_
     show w k - stepCount S (k : ℕ) ≤ w l - stepCount S (l : ℕ)
-    by_cases hmem : (l : ℕ) ∈ S
-    · have hlt := hw.lt_of_mem k l hkl hmem
-      have hst : stepCount S (l : ℕ) = stepCount S (k : ℕ) + 1 := by
-        rw [← hkl] at hmem ⊢
-        exact stepCount_succ_of_mem hmem
-      omega
-    · have hle : w k ≤ w l := hw.monotone (by rw [Fin.le_def]; omega)
-      have hst : stepCount S (l : ℕ) = stepCount S (k : ℕ) := by
-        rw [← hkl] at hmem ⊢
-        exact stepCount_succ_of_notMem hmem
-      omega
+    have hle : w k ≤ w l := hw.monotone (by rw [Fin.le_def]; omega)
+    have hlt : stepCount S (k : ℕ) < stepCount S (l : ℕ) → w k < w l := fun h =>
+      hw.lt_of_mem k l hkl ((stepCount_lt_stepCount_iff_of_succ hkl).mp h)
+    have hgap : stepCount S (l : ℕ) ≤ stepCount S (k : ℕ) + 1 := stepCount_le_stepCount_add hkl
+    omega
   lt_of_mem := fun _ _ _ h => absurd h (notMem_empty _)
 
 /-- Shifting a weakly increasing word up by the step count at each position gives an
@@ -309,13 +327,9 @@ theorem isAscendingWord_add_stepCount {v : Fin n → ℕ} (hv : IsAscendingWord 
     IsAscendingWord n S (fun k => v k + stepCount S (k : ℕ)) where
   monotone := fun k l hkl =>
     Nat.add_le_add (hv.monotone hkl) (stepCount_mono (Fin.le_def.mp hkl))
-  lt_of_mem := fun k l hkl hmem => by
-    show v k + stepCount S (k : ℕ) < v l + stepCount S (l : ℕ)
-    have hst : stepCount S (l : ℕ) = stepCount S (k : ℕ) + 1 := by
-      rw [← hkl] at hmem ⊢
-      exact stepCount_succ_of_mem hmem
-    have hle : v k ≤ v l := hv.monotone (by rw [Fin.le_def]; omega)
-    omega
+  lt_of_mem := fun k l hkl hmem =>
+    Nat.add_lt_add_of_le_of_lt (hv.monotone (by rw [Fin.le_def]; omega))
+      ((stepCount_lt_stepCount_iff_of_succ hkl).mpr hmem)
 
 /-- **Removing the strict steps**: the `S`-ascending words of length `n + 1` in `m` letters are as
 many as the weakly increasing words of length `n + 1` in `m - #S` letters, the two being matched by

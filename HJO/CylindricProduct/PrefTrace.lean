@@ -1236,7 +1236,7 @@ slot-ordered word as `C_c(q)`, part (b) turns the crossing prefactor times that 
 of `transferKernel`, and part (c) names the prefactor as the product over the interchanged
 pairs.
 
-The identity in the source reads
+The identity as usually written reads
 
     C_c(q) = (∏_{s lowering, s' raising, s' < s} (1 - q^{s-s'})^{-1}) Tr S
 
@@ -1249,9 +1249,9 @@ the sorted transfer kernel `transferKernel a b` and the slots those of its rotat
 
 `(∏_{s lowering, s' raising, s' < s} (1 - q^{s-s'})) C_c(q) = Tr S`,
 
-which is the identity of the source cleared of its inverses. The index set is `slotPairs` at the
-rotation shift, cut down to the pairs the sorting actually interchanges: `p.1` runs over the
-lowering slots, `p.2` over the raising ones, and the filter keeps `p.2 < p.1`. -/
+which is the identity displayed in the section heading, cleared of its inverses. The index set is
+`slotPairs` at the rotation shift, cut down to the pairs the sorting actually interchanges: `p.1`
+runs over the lowering slots, `p.2` over the raising ones, and the filter keeps `p.2 < p.1`. -/
 @[hjo "lem_cyl_pref_trace"]
 theorem prod_slotPairs_mul_unboundedGF {a b : ℕ} (hco : Nat.Coprime a b) (ha : 0 < a)
     (hb : 0 < b) :

@@ -5,11 +5,6 @@ Authors: Kenny Lau
 -/
 module
 
-public import Mathlib.Algebra.BigOperators.Finsupp.Basic
-public import Mathlib.Algebra.Order.Antidiag.Finsupp
-public import Mathlib.Algebra.Polynomial.Eval.Defs
-public import Mathlib.Data.Fintype.Pi
-public import Mathlib.Data.Nat.Factorial.Basic
 public import Mathlib.RingTheory.PowerSeries.Basic
 public import HJO.Symmetric.SymmetricFunctions
 public meta import HJO.Attr
@@ -26,19 +21,20 @@ of them whose letters are among the first `m`, and the exponent vector of a word
 Two conventions are worth naming before they are used.
 
 *The alphabet is indexed from `0`.* The ambient `Sym.AlphabetSeries K` is `K⟦x₀, x₁, …⟧`, so the
-source's letters `x_1, …, x_m` are `x_0, …, x_{m-1}` here. The source's lower bound `1 ≤ i_1` on a
-word is therefore the vacuous `0 ≤ i_1`, and its bound `i_n ≤ m` on a bounded word is `i_n < m`:
-both say that the word uses only the first `m` letters. This is the reindexing already built into
-`ParkingFunctions.gessel`, whose tuples carry no lower bound either, and it leaves every count
-unchanged -- what is counted is the words available in an alphabet of `m` letters.
+letters `x_1, …, x_m` of the usual `1`-based numbering are `x_0, …, x_{m-1}` here. The `1`-based
+lower bound `1 ≤ i_1` on a word is therefore the vacuous `0 ≤ i_1`, and the bound `i_n ≤ m` on a
+bounded word is `i_n < m`: both say that the word uses only the first `m` letters. This is the
+reindexing already built into `ParkingFunctions.gessel`, whose tuples carry no lower bound either,
+and it leaves every count unchanged -- what is counted is the words available in an alphabet of
+`m` letters.
 
 *A word of length `n` is a tuple, hence `Fin n → ℕ`, with `w k` standing for `i_{k+1}`.* The
 positions are `0`-based while the descent set `S` stays `1`-based, as it is in
-`ParkingFunctions.ides`: the source's step `j ∈ S` is the step into the position `j`, which is the
-`0`-based position `j` reached from the `0`-based position `j - 1`. Recording a word as a tuple
-rather than as a function `ℕ → ℕ` read on a window is what makes the bounded words a `Finset`, so
-that their number -- the quantity the descent polynomial computes -- is the cardinality of a
-finite set.
+`ParkingFunctions.ides`: a step `j ∈ S`, which in the `1`-based numbering is the step from `i_j` to
+`i_{j+1}`, is the step into the `0`-based position `j` from the `0`-based position `j - 1`.
+Recording a word as a tuple rather than as a function `ℕ → ℕ` read on a window is what makes the
+bounded words a `Finset`, so that their number -- the quantity the descent polynomial computes -- is
+the cardinality of a finite set.
 -/
 
 @[expose] public section
@@ -65,7 +61,7 @@ noncomputable def letterEval {K : Type*} [CommRing K] (m : ℕ) (G : AlphabetSer
 
 /-- **The defining coefficients of the evaluation at `m` letters**: `[y^N] E_m(G)` is the sum of
 `[x^d] G` over the exponent vectors `d` of total degree `N` supported in the first `m` letters,
-which is the source's sum over the `m`-tuples `d_0 + ⋯ + d_{m-1} = N`. -/
+which is the sum over the `m`-tuples `d_0 + ⋯ + d_{m-1} = N`. -/
 @[hjo "def_letter_eval"]
 theorem coeff_letterEval {K : Type*} [CommRing K] (m N : ℕ) (G : AlphabetSeries K) :
     PowerSeries.coeff N (letterEval m G) =
@@ -129,7 +125,7 @@ theorem factorial_mul_descentPoly (n j : ℕ) :
   rw [descentPoly, ← mul_assoc, ← Polynomial.C_eq_natCast, ← Polynomial.C_mul, h, Polynomial.C_1,
     one_mul]
 
-/-- The value of the descent polynomial at `x`, in the form the source writes it. -/
+/-- The value of the descent polynomial at `x`, in the form `(1/n!) ∏_{r < n} (x - j + r)`. -/
 theorem eval_descentPoly (n j : ℕ) (x : K) :
     (descentPoly K n j).eval x =
       algebraMap ℚ K ((n ! : ℚ)⁻¹) * ∏ r ∈ range n, (x - j + r) := by
@@ -147,18 +143,19 @@ end DescentPoly
 
 /-- The tuple `w = (i_1, …, i_n)`, recorded as `w : Fin n → ℕ` with `w k` standing for `i_{k+1}`,
 is an `S`-ascending word: it is weakly increasing, and it increases strictly at every step in `S`.
-The tuples with this property are the source's `W_{n,S}`.
+The tuples with this property form the set `W_{n,S}`.
 
-The letters being indexed from `0`, the source's lower bound `1 ≤ i_1` is vacuous here. Only the
-elements of `S` in `[1, n-1]` constrain a word, that being the range in which the descent sets of
-the development live; on other values of `S` the condition is a totalization with no source
-content. -/
+The letters being indexed from `0`, the `1`-based lower bound `1 ≤ i_1` is vacuous here. Only the
+elements of `S` in `[1, n-1]` constrain a word, that being the range in which the descent sets
+used in this library live; on other values of `S` the condition is a totalization with no
+mathematical content. That is `isAscendingWord_inter_Ico_iff`, and
+`IsAscendingWord.mono_of_inter_subset` is the one-sided form it comes from. -/
 @[hjo "def_ascending_word"]
 structure IsAscendingWord (n : ℕ) (S : Finset ℕ) (w : Fin n → ℕ) : Prop where
   /-- An ascending word is weakly increasing: `i_1 ≤ i_2 ≤ ⋯ ≤ i_n`. -/
   monotone : Monotone w
   /-- An ascending word increases strictly at every step in `S`: `i_j < i_{j+1}` for `j ∈ S`,
-  the source's step `j` being the step into the `0`-based position `l = j`, taken from the
+  the `1`-based step `j` being the step into the `0`-based position `l = j`, taken from the
   `0`-based position `k` before it. -/
   lt_of_mem : ∀ k l : Fin n, (k : ℕ) + 1 = (l : ℕ) → (l : ℕ) ∈ S → w k < w l
 
@@ -170,8 +167,24 @@ instance instDecidableIsAscendingWord (n : ℕ) (S : Finset ℕ) (w : Fin n → 
       ∀ k l : Fin n, (k : ℕ) + 1 = (l : ℕ) → (l : ℕ) ∈ S → w k < w l)
     ⟨fun h => ⟨fun _ _ hkl => h.1 _ _ hkl, h.2⟩, fun h => ⟨fun _ _ hkl => h.1 hkl, h.2⟩⟩
 
+/-- **Being ascending depends on the step set only inside the window**: a `T`-ascending word of
+length `n` is `S`-ascending as soon as every step of `S` in `{1, …, n-1}` is a step of `T`. A
+strict step is demanded only across a pair of adjacent positions of `Fin n`, and such a pair
+exists exactly for a step in that window, so steps outside it are inert. -/
+theorem IsAscendingWord.mono_of_inter_subset {n : ℕ} {S T : Finset ℕ} {w : Fin n → ℕ}
+    (hw : IsAscendingWord n T w) (hST : S ∩ Ico 1 n ⊆ T) : IsAscendingWord n S w :=
+  ⟨hw.monotone, fun k l hkl hmem =>
+    hw.lt_of_mem k l hkl (hST (mem_inter.mpr ⟨hmem, mem_Ico.mpr ⟨by omega, l.2⟩⟩))⟩
+
+/-- Being an `S`-ascending word is a property of `S ∩ Finset.Ico 1 n`: the totalization outside
+the window `{1, …, n-1}` carries no content. -/
+theorem isAscendingWord_inter_Ico_iff {n : ℕ} {S : Finset ℕ} {w : Fin n → ℕ} :
+    IsAscendingWord n (S ∩ Ico 1 n) w ↔ IsAscendingWord n S w :=
+  ⟨fun h => h.mono_of_inter_subset Subset.rfl,
+    fun h => h.mono_of_inter_subset (inter_subset_left.trans inter_subset_left)⟩
+
 /-- `W^{(m)}_{n,S}`, the `S`-ascending words of length `n` all of whose letters are among the
-first `m`: since the letters are indexed from `0`, that is the source's bound `i_n ≤ m` on the
+first `m`: since the letters are indexed from `0`, that is the `1`-based bound `i_n ≤ m` on the
 last entry, in the form `i_n < m`. Bounding the letters makes these words a `Finset`, whose
 cardinality is the count the descent polynomial computes. -/
 @[hjo "def_bounded_word"]
@@ -187,8 +200,8 @@ theorem mem_boundedWords {n : ℕ} {S : Finset ℕ} {m : ℕ} {w : Fin n → ℕ
   simp only [mem_range]
   exact and_comm
 
-/-- The bound on a bounded word is carried by its last entry alone, which is the form the source
-states it in: the entries are weakly increasing, so `i_n < m` bounds them all. -/
+/-- The bound on a bounded word is carried by its last entry alone, which is the form in which it
+is usually stated: the entries are weakly increasing, so `i_n < m` bounds them all. -/
 theorem mem_boundedWords_succ {n : ℕ} {S : Finset ℕ} {m : ℕ} {w : Fin (n + 1) → ℕ} :
     w ∈ boundedWords (n + 1) S m ↔ IsAscendingWord (n + 1) S w ∧ w (Fin.last n) < m := by
   rw [mem_boundedWords]

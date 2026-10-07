@@ -26,7 +26,7 @@ nonnegative on a pair of order filters; so discarding the off-diagonal terms onl
 value. And each diagonal term is at least `m_E(𝐧)^2`, because `B(𝟙_E, 𝟙_E) = Q(𝟙_E) ≥ 1` for a
 nonempty order filter `E`.
 
-Two inputs come from outside this subtree, and both are proved in this development rather than
+Two inputs come from outside this subtree, and both are proved in this library rather than
 assumed: Huang's rank-one identity, as `HJO.ExternalDischarged.rankOneDinv` from the rank-one
 subtree, and the nonnegativity of the polarised form on a pair of order filters, as
 `HJO.CrossDinv.bilin_nonneg` from the cross-dinv identity. So the bound below is unconditional —
@@ -85,7 +85,7 @@ theorem q_eq_sum_sum_layerMult (hco : a.Coprime b) (ha : 1 < a) (hab : a < b)
 
 /-- **Discarding the cross terms**: `Q(𝐧) ≥ ∑_E m_E(𝐧)^2` for every `𝐧` in the monotonicity cone.
 
-Unconditional. Both results it rests on are proved in this development rather than assumed: Huang's
+Unconditional. Both results it rests on are proved in this library rather than assumed: Huang's
 rank-one identity is `HJO.ExternalDischarged.rankOneDinv`, and the nonnegativity of the polarised
 form on a pair of order filters is `HJO.CrossDinv.bilin_nonneg`, from the cross-dinv identity. -/
 @[hjo "lem_quadratic_ge_multiplicity_squares"]

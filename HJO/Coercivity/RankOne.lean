@@ -83,7 +83,7 @@ theorem one_le_hookCount (ha : 1 < a) (hb : 0 < b) {y : Paths.Heights a b 1}
   have hi₀one : 1 ≤ i₀ := hyr.trans (Finset.le_sup hrI)
   have hi₀b : i₀ ≤ b := by
     rw [hr₁]
-    simpa using RankOneDinv.ht_le_mul y r₁
+    simpa using Paths.ht_le_mul y r₁
   have hend : Paths.ht y (a * 1) = b * 1 := hy.2.1
   have hi₀ht : i₀ ≤ Paths.ht y (Paths.firstReach y i₀) :=
     ReturnPath.le_ht_firstReach y (by rw [hend]; omega)

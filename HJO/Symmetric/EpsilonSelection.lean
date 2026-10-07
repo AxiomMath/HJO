@@ -5,11 +5,13 @@ Authors: Kenny Lau
 -/
 module
 
+public import Mathlib.Data.Int.Star
+public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Data.Fin.Tuple.Sort
 public import Mathlib.Data.Int.ConditionallyCompleteOrder
 public import HJO.Paths.Basic
 public import HJO.Symmetric.SymmetricFunctions
-public import HJO.Defs
+public import HJO.Paths.Defs
 public meta import HJO.Attr
 
 /-! # Sign extraction on the parking-function expansion
@@ -27,16 +29,6 @@ hook count and area.
 @[expose] public section
 
 open Finset
-
-namespace HJO.ParkingFunctions
-
-variable {a b N : ℕ}
-
-/-- `ides(π)` is a descent set on degree `bN`: it is a subset of `1, …, bN - 1`. -/
-theorem ides_subset (π : ParkingFunction a b N) : ides π ⊆ Ico 1 (b * N) :=
-  filter_subset _ _
-
-end HJO.ParkingFunctions
 
 namespace HJO.EpsilonSelection
 
@@ -435,7 +427,7 @@ keeps precisely the parking functions with a full inverse descent set. The expan
 the behaviour of sign extraction on the fundamental quasisymmetric functions are taken as
 hypotheses `shuffle` and `signExtract_gessel`; neither is proved here. The seed of a composition
 `β` expands over the parking functions of return composition `β.reverse`, the below-diagonal
-convention reading the blocks of the source's composition from the other end. -/
+convention reading the blocks of the composition `β` from the other end. -/
 theorem signExtract_copComp_eq_sum_full_ides {q u : L}
     (shuffle : ∀ (ι : Sym.Lambda L →ₐ[L] Sym.AlphabetSeries L), Sym.IsRealisation ι →
       ∀ Θ : Sym.Lambda L →ₐ[L] Module.End L (Sym.Lambda L), Sym.IsSlopeHom a b q u Θ →
@@ -466,7 +458,7 @@ theorem signExtract_copComp_eq_sum_full_ides {q u : L}
 /-- Sign extraction of a composite creation operator, applied to `1` and corrected by the sign
 `(-1) ^ (N (b + 1))`, is the generating function of the below-diagonal `(aN, bN)`-paths with
 return composition `α.reverse` by hook count and area, the below-diagonal convention reading the
-blocks of the source's composition from the other end. The compositional rational shuffle identity
+blocks of the composition `α` from the other end. The compositional rational shuffle identity
 and the effect of sign extraction on the fundamental quasisymmetric functions are the hypotheses
 `shuffle` and `signExtract_gessel`; neither is proved here. -/
 @[hjo "lem_epsilon_selection"]

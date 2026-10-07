@@ -119,9 +119,10 @@ theorem q_eq_sum_sum (a b : ℕ) (n : (finspan {a, b}).gaps → ℤ) :
 
 /-! ### The gap product -/
 
-/-- The gap product `P_G n = ∏_{g ∈ G} (q)_{n g - n (g-a-b)} / ((q)_{n g - n (g-a)}
-(q)_{n g - n (g-b)})`, where `(q)_m` is `(X; X)_m` for `m ≥ 0` and `0` for `m < 0`, and dividing
-by `(q)_m` means multiplying by its power series inverse. -/
+/-- The gap product
+`P_G n = ∏_{g ∈ G} (q)_{n g - n (g-a-b)} / ((q)_{n g - n (g-a)} (q)_{n g - n (g-b)})`,
+where `(q)_m` is `(X; X)_m` for `m ≥ 0` and `0` for `m < 0`, and dividing by `(q)_m` means
+multiplying by its power series inverse. -/
 @[hjo "def_gap_product"]
 theorem prod_multiplicand_eq (a b : ℕ) (n : (finspan {a, b}).gaps → ℤ) :
     ∏ g : (finspan {a, b}).gaps, HJO.multiplicand _ a b n g =

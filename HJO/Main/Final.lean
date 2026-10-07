@@ -12,7 +12,7 @@ public import HJO.Discharged.GoodTraverse
 public import HJO.Evaluation.PhiMul
 public meta import HJO.Attr
 
-/-! # The five conclusions at the model
+/-! # The conclusions at the model
 
 The chain over one hypothesis is closed here by reading it at the concrete specialisation data.
 That data supplies a coefficient *ring* whose specialisation sends the second parameter to `1`,
@@ -34,8 +34,10 @@ them is a polynomial in two variables over `ℤ` vanishing after the substitutio
 `ℤ` by a map with a left inverse.
 
 The conclusions are the exponential form of the generating series of the finite polynomials, the
-`q`-difference equation it satisfies, the scalar recurrence, the finite identity and the
-conjecture. Beyond the results quoted from the literature nothing is assumed.
+`q`-difference equation it satisfies and the scalar recurrence. Beyond the results quoted from the
+literature nothing is assumed. The finite identity and the conjecture themselves, with nothing
+assumed at all, are `HJO.finiteSeries_eq_qPochhammer_mul_boundedGF` and `HJO.conjecture` in
+`HJO/Main.lean`, which close these two inputs too.
 
 Only two of those quoted results are still needed. Six of the eight are proved in
 `HJO/Discharged/`: the rank-one dinv identity, the Macdonald--Gessel reading of sign extraction and
@@ -184,32 +186,5 @@ theorem finiteSeries_recurrence (collinear : External.CollinearCommutation Base)
           PowerSeries.X ^ Paths.gammaShift a b (N - j) * Gaps.finiteSeries a b (N - j) *
           ∏ i ∈ Ico (N - j + 1) N, (1 - PowerSeries.X ^ i) :=
   Endgame.finiteSeries_recurrence (isCommonSolution_genH collinear shuffle hab ha hb) N hN
-
-/-- The finite identity `F_N(q) = (q)_N C_{𝐜,≤N}(q)`. -/
-@[hjo "thm_finite"]
-theorem finiteSeries_eq_qPochhammer_mul_boundedGF (collinear : External.CollinearCommutation Base)
-    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b)
-    (ha : 1 < a) (hb : a < b) (N : ℕ) :
-    Gaps.finiteSeries a b N
-      = qPochhammer PowerSeries.X PowerSeries.X N * HJO.Cylindric.boundedGF a b N := by
-  obtain ⟨Θ, hΘ⟩ := Witness.exists_isSlopeHom collinear hab ha hb
-  exact Assembly.finiteSeries_eq_qPochhammer_mul_boundedGF ExternalDischarged.rankOneDinv
-    GoodTraverseDischarged.goodTraverse CoercivityDischarged.huangCoercivity shuffle
-    (realise Base) (isRealisation_realise Base) hab ha hb
-    (Witness.algebraicIndependent_param (algebraMap Coeff Base) Witness.algebraMap_injective _
-      algebraMap_qVar) (by rw [algebraMap_qVar]; exact hΘ) (isEvaluationHom_phi hΘ) N
-
-/-- The Huang--Jiang--Oblomkov conjecture. -/
-@[hjo "thm_main"]
-theorem conjecture (collinear : External.CollinearCommutation Base)
-    (shuffle : External.Shuffle Base) {a b : ℕ} (hab : Nat.Coprime a b)
-    (ha : 1 < a) (hb : a < b) : HJO.Conjecture a b := by
-  obtain ⟨Θ, hΘ⟩ := Witness.exists_isSlopeHom collinear hab ha hb
-  exact Assembly.conjecture ExternalDischarged.rankOneDinv GoodTraverseDischarged.goodTraverse
-    CoercivityDischarged.huangCoercivity shuffle
-    (realise Base) (isRealisation_realise Base) hab ha hb
-    (Witness.algebraicIndependent_param (algebraMap Coeff Base) Witness.algebraMap_injective _
-      algebraMap_qVar) (by rw [algebraMap_qVar]; exact hΘ) (isEvaluationHom_phi hΘ)
-    CylindricProductDischarged.cylindricProduct
 
 end HJO.Final

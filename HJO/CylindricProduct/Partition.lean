@@ -112,8 +112,11 @@ the first argument. -/
 @[hjo "def_hstrip"]
 def IsHStrip (ν μ : Part) : Prop := ∀ i, μ.parts i ≤ ν.parts i ∧ ν.parts (i + 1) ≤ μ.parts i
 
-/-- The denominator of a horizontal strip is contained in its numerator, so its size is at
-most that of the numerator. -/
+/-- **A horizontal strip only grows a partition**: the denominator of a horizontal strip is
+contained in its numerator, so its size is at most that of the numerator. This is what makes the
+truncated exponent `|ν| - |μ|` of the raising and lowering kernels the true difference of the two
+sizes. -/
+@[hjo "lem_hstrip_size"]
 theorem IsHStrip.size_le {ν μ : Part} (h : IsHStrip ν μ) : μ.size ≤ ν.size :=
   Part.size_le_size fun i => (h i).1
 

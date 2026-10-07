@@ -268,7 +268,7 @@ theorem X_pow_dvd_mul_mul_sub_one {n : ℕ} {E S P Q T W : ℤ⟦X⟧} (hES : E 
     _ = E * S - 1 + X ^ n * (E * T * c1 + E * c2) := by ring
     _ = X ^ n * (E * T * c1 + E * c2) := by rw [hES, sub_self, zero_add]
 
-/-- **The winding identity** at the arguments the development uses: the lowering arguments are
+/-- **The winding identity** at the arguments the library uses: the lowering arguments are
 `y_j = q^{m_j}` and the raising arguments `x_i = q^{p_i}`, with all exponents positive. Written
 without inverses, the identity
 

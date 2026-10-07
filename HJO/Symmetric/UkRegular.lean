@@ -5,6 +5,8 @@ Authors: Kenny Lau
 -/
 module
 
+public import QSeriesLib.Data.Finsupp.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
 public import HJO.Symmetric.SymmetricFunctions
 public meta import HJO.Attr
 

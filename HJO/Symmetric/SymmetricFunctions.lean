@@ -6,8 +6,9 @@ Authors: Kenny Lau
 module
 
 public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Tactic.IntervalCases
 public meta import HJO.Attr
-public import HJO.Defs
+public import HJO.Symmetric.Defs
 
 /-! # The split of a slope, the slope operators and the differential-order filtration
 
@@ -39,6 +40,32 @@ order, and the order-filtered algebra `Rees` of the operators admitting an expan
 open Finset
 
 namespace HJO.Sym
+
+section CommRing
+
+variable {K : Type*} [CommRing K]
+
+/-- A diagonal substitution fixes the constants, being an algebra map. -/
+@[simp]
+theorem diagScale_C (c : ℕ → K) (a : K) :
+    diagScale c (MvPolynomial.C a) = MvPolynomial.C a := by
+  rw [← MvPolynomial.algebraMap_eq, AlgHom.commutes]
+
+/-- A diagonal substitution multiplies the generator of index `i` by the scalar `c i`. -/
+@[simp]
+theorem diagScale_X (c : ℕ → K) (i : ℕ) :
+    diagScale c (MvPolynomial.X i) = MvPolynomial.C (c i) * MvPolynomial.X i :=
+  MvPolynomial.aeval_X _ i
+
+/-- A diagonal substitution multiplies the power sum `p_j` by the scalar the family attaches to
+it. No positivity of `j` is needed: both sides read the family through `j - 1`, so the truncated
+subtraction of `powerSum` affects them alike. -/
+@[simp]
+theorem diagScale_powerSum (c : ℕ → K) (j : ℕ) :
+    diagScale c (powerSum K j) = MvPolynomial.C (c (j - 1)) * powerSum K j :=
+  MvPolynomial.aeval_X _ _
+
+end CommRing
 
 /-! ### The split of a slope: the search succeeds, the bounds, and coprimality -/
 
@@ -83,6 +110,26 @@ theorem split_fst_lt {m : ℕ} (n : ℕ) (hm : 1 < m) : (Split m n).1 < m := by
   · rw [split_default hl]; exact hm
   · exact (split_props (p := x) (by rw [hl]; exact List.mem_cons_self ..)).2.2.1
 
+/-- The second entry of `Split m n` never exceeds `n`, with no hypothesis on either index: a
+search hit lies in `List.range n`, and the default `(1, 0)` has second entry `0`. This is what
+makes the complement `n - (Split m n).2` an honest subtraction at every pair. -/
+theorem split_snd_le (m n : ℕ) : (Split m n).2 ≤ n := by
+  rcases hl : (List.range m ×ˢ List.range n).filter
+      (fun p => 1 ≤ p.1 ∧ 1 ≤ p.2 ∧ m * p.2 + 1 = n * p.1) with _ | ⟨x, xs⟩
+  · rw [split_default hl]; exact Nat.zero_le n
+  · exact (split_props (p := x) (by rw [hl]; exact List.mem_cons_self ..)).2.2.2.1.le
+
+/-- The second entry of `slopeSplit m n` never exceeds `n`, with no hypothesis on either index:
+all three branches of `primitiveSplit` bound their second entry by the height `n / gcd m n` of
+the primitive pair, which is at most `n`. -/
+theorem slopeSplit_snd_le (m n : ℕ) : (slopeSplit m n).2 ≤ n := by
+  have hb : n / Nat.gcd m n ≤ n := Nat.div_le_self n _
+  rw [slopeSplit, primitiveSplit]
+  split_ifs
+  · exact (Nat.sub_le _ _).trans hb
+  · exact Nat.zero_le n
+  · exact (split_snd_le _ _).trans hb
+
 /-- The clamp of `splitFst` is inactive: for `m > 1` it returns exactly `(Split m n).1`. -/
 theorem splitFst_eq {m : ℕ} (n : ℕ) (hm : 1 < m) : splitFst m n = (Split m n).1 := by
   have h1 := one_le_split_fst m n
@@ -123,7 +170,7 @@ theorem split_spec_interior {a b : ℕ} (ha : 1 < a) (hb : 1 < b) (hab : Nat.Cop
   exact ⟨⟨hr, hs⟩, hr1, hs1, heq⟩
 
 /-- `Split m n` at a coprime slope with `m > 1`, the domain of the primitive recursion. The
-second entry is only bounded above: at `n = 1` the source's split is `(1, 0)`, which is what
+second entry is only bounded above: at `n = 1` the split is `(1, 0)` by convention, which is what
 the empty search returns, and there the second entry is `0`. -/
 theorem split_spec {m n : ℕ} (hm : 1 < m) (h : Nat.Coprime m n) :
     1 ≤ (Split m n).1 ∧ (Split m n).1 < m ∧ (Split m n).2 < n ∧
@@ -166,7 +213,7 @@ theorem coprime_halves_of_coprime {m n : ℕ} (hm : 1 < m) (h : Nat.Coprime m n)
   have h3 : m * n = n * m := Nat.mul_comm _ _
   exact (coprime_of_bezout (c := n) (d := m) (by omega)).symm
 
-/-- The primitive split of a positive coprime pair satisfies the source's split equation, its
+/-- The primitive split of a positive coprime pair satisfies the split equation `a s + 1 = b r`, its
 first entry lies in `[1, a]` and its second in `[0, b - 1]`. -/
 theorem primitiveSplit_spec {a b : ℕ} (ha : 0 < a) (hb : 0 < b) (hab : Nat.Coprime a b) :
     1 ≤ (primitiveSplit a b).1 ∧ (primitiveSplit a b).1 ≤ a ∧ (primitiveSplit a b).2 < b ∧
@@ -246,6 +293,17 @@ omit [Algebra ℚ L] in
 /-- The axis alphabet as a diagonal substitution, the form its coefficients are read off from. -/
 theorem plethAxis_eq_diagScale (v : L) :
     plethAxis v = diagScale fun index => (v ^ (index + 1))⁻¹ - 1 := rfl
+
+omit [Algebra ℚ L] in
+/-- **The defining property of the difference alphabet at `qu`**: the substitution
+`σ⁻ = f ↦ f[(1 - v)/v * X]` sends the power sum `p_j` to `((v ^ j)⁻¹ - 1) * p_j` for every
+`j ≥ 1`. The alphabet being the difference `v⁻¹ X - X` of two monomial alphabets, the scalar is
+`(v ^ j)⁻¹ - 1` and not the `j`-th power `((1 - v)/v) ^ j` that `plethScale ((1 - v)/v)` would
+contribute. The hypothesis `0 < j` is needed: `powerSum L 0` is the generator `powerSum L 1`. -/
+@[hjo "def_pleth_diff_qu"]
+theorem plethAxis_powerSum (v : L) {j : ℕ} (hj : 0 < j) :
+    plethAxis v (powerSum L j) = MvPolynomial.C ((v ^ j)⁻¹ - 1) * powerSum L j := by
+  rw [powerSum, plethAxis, diagScale, MvPolynomial.aeval_X, Nat.sub_add_cancel hj]
 
 /-- The zero-fuel value of the fuelled recursion. -/
 theorem qopAux_zero (q u : L) (m n : ℕ) : QopAux q u 0 m n = Dop q u n := rfl
@@ -360,7 +418,7 @@ theorem qop_of_not_coprime (q u : L) {m n : ℕ} (hm : 1 < m) (h : ¬ Nat.Coprim
   · exact absurd h1 (by omega)
   · rfl
 
-/-- **The source's noncoprime extension at `v = 1`, in terms of the slope operators
+/-- **The noncoprime extension at `v = 1`, in terms of the slope operators
 themselves.** Both halves of `slopeSplit m n` are coprime, so the primitive evaluators
 appearing in the definition are the slope operators of those two slopes. -/
 theorem qop_eq_bracket (q u : L) {m n : ℕ} (hm : 1 < m) (hn : 0 < n) (h : ¬ Nat.Coprime m n) :
@@ -372,7 +430,7 @@ theorem qop_eq_bracket (q u : L) {m n : ℕ} (hm : 1 < m) (hn : 0 < n) (h : ¬ N
   obtain ⟨-, -, -, -, -, hc1, hc2⟩ := slopeSplit_spec hm hn h
   rw [qop_eq_qopPrim q u hc1, qop_eq_qopPrim q u hc2, qop_of_not_coprime q u hm h]
 
-/-- **The source's primitive recursion, in terms of the slope operators themselves.** -/
+/-- **The primitive recursion, in terms of the slope operators themselves.** -/
 theorem qop_of_coprime (q u : L) {m n : ℕ} (hm : 1 < m) (h : Nat.Coprime m n) :
     Qop q u m n = ((1 - q) * (1 - u))⁻¹ •
       (Qop q u (m - (Split m n).1) (n - (Split m n).2) *

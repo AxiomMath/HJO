@@ -5,7 +5,7 @@ Authors: Kenny Lau
 -/
 module
 
-public import Mathlib.Algebra.Order.Ring.Star
+public import HJO.Collinear.HAlphabet
 public import HJO.Symmetric.DiffOrder
 public import HJO.Symmetric.Multiplication
 public meta import HJO.Attr
@@ -701,15 +701,6 @@ theorem exists_notMem_reesRegComm :
   refine inv_algebraMap_u_notMem_regSub ?_
   simpa using apply_mem_regSub_of_mem_reesRegComm hP (one_mem_regSub (R := Coeff) (L := Base))
 
-/-- The elementary symmetric function of degree zero is `1`. -/
-theorem elemSymm_zero {L : Type*} [Field L] [Algebra ℚ L] : elemSymm L 0 = 1 := by
-  rw [elemSymm]
-
-/-- The elementary symmetric function of degree one is the first power sum. -/
-theorem elemSymm_one {L : Type*} [Field L] [Algebra ℚ L] : elemSymm L 1 = MvPolynomial.X 0 := by
-  rw [show (1 : ℕ) = 0 + 1 from rfl, elemSymm]
-  simp [powerSum, elemSymm_zero]
-
 /-- The basic operator of index zero fixes `1`, the displacement of a constant being that
 constant. -/
 theorem dop_zero_apply_one {L : Type*} [Field L] [Algebra ℚ L] (q u : L) :
@@ -731,11 +722,8 @@ theorem dop_zero_apply_X {L : Type*} [Field L] [Algebra ℚ L] (q u : L) :
           ≤ 1 := by compute_degree
     omega
   rw [dop_apply_eq_sum q u 0 (MvPolynomial.X 0) hdeg, Finset.sum_range_succ, Finset.sum_range_one,
-    dopPiece_apply, dopPiece_apply, plethShift_X, elemSymm_zero, elemSymm_one]
-  simp only [Polynomial.coeff_add, Polynomial.coeff_C, Polynomial.coeff_C_mul,
-    Polynomial.coeff_X_pow, shiftScalar]
-  ring_nf
-  simp [mul_comm, mul_left_comm]
+    dopPiece_apply, dopPiece_apply, plethShift_X, elemSymm_zero, elemSymm_one, powerSum]
+  simp [shiftScalar]
   ring
 
 /-- The basic operator of index zero is not a multiplication operator wherever the deformation
@@ -781,7 +769,7 @@ theorem exists_axisGen_witness {L : Type*} [Field L] [Algebra ℚ L] {v : L}
   refine ⟨fun k => axisGen v k, fun k _ => ?_, fun m => ?_⟩
   · rw [coeffInc_apply, Algebra.algebraMap_self, MvPolynomial.map_id]
   · refine isUnit_iff_ne_zero.mpr ?_
-    have h := (coeff_single_axisGen_ne_zero hv0 hv1 (k := m + 1) (Nat.le_add_left 1 m)).2
+    have h := Sym.coeff_single_axisGen_ne_zero hv0 hv1 (k := m + 1) (Nat.le_add_left 1 m)
     rwa [Nat.add_sub_cancel] at h
 
 end Witness
