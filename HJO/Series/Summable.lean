@@ -15,19 +15,24 @@ public meta import HJO.Attr
 For `0 < a` the family `q^{|λ|}`, indexed by the cylindric partitions of a fixed profile
 either with all entries at most `N` or with no bound at all, is summable in `ℤ⟦X⟧`. Both
 reduce to the statement that only finitely many such cylinders have volume below a given
-bound, which holds because a nonzero entry far along a weakly decreasing row costs volume.
+bound, which holds because a nonzero entry far along a weakly decreasing row costs volume:
+a nonzero entry at position `j` of a weakly decreasing row is preceded by `j` entries at
+least as large, so that row alone contributes more than `j` to the volume.
 
-The two conclusions are deliberately NOT named `HJO.Cylindric.summable_boundedGF` and
-`HJO.Cylindric.summable_unboundedGF`, the names the challenge file gives these statements: those
-names are the *contract*, and `Solution/Basic.lean` is what must carry them. A library declaration
-under a contract name collides with the solution's, and there is then nothing for the comparator
-to compare.
+## Main results
+
+* `HJO.Summable.eq_zero_of_cylVolume_le`: an entry of a cylinder at a position that has
+  reached the volume is zero.
+* `HJO.Summable.finite_setOf_cylVolume_lt`: only finitely many cylinders of a fixed profile,
+  with entries bounded by `N`, have volume below a given bound.
+* `HJO.Summable.summable_boundedGF`, `HJO.Summable.summable_unboundedGF`: the volume
+  generating functions are genuine sums in `ℤ⟦X⟧`.
 -/
 
 @[expose] public section
 
-open Finset Filter PowerSeries
-open scoped PowerSeries.DiscreteTopology QTheory
+open Finset PowerSeries
+open scoped PowerSeries.DiscreteTopology
 
 namespace HJO.Summable
 
@@ -48,13 +53,11 @@ theorem succ_le_rowSum {l : ℕ → ℕ → ℕ} {i j : ℕ} (hmono : Antitone (
   obtain ⟨J, hJ⟩ := hz
   rw [rowSum_eq_sum (J := max J (j + 1)) fun k hk => hJ k ((le_max_left _ _).trans hk)]
   calc j + 1 = ∑ _k ∈ range (j + 1), 1 := by simp
-    _ ≤ ∑ k ∈ range (j + 1), l i k := by
-        refine Finset.sum_le_sum fun k hk => ?_
-        have := hmono (show k ≤ j by simpa [Nat.lt_succ_iff] using hk)
-        omega
+    _ ≤ ∑ k ∈ range (j + 1), l i k :=
+        Finset.sum_le_sum fun k hk =>
+          (Nat.one_le_iff_ne_zero.mpr hj).trans (hmono (Nat.lt_succ_iff.mp (mem_range.mp hk)))
     _ ≤ ∑ k ∈ range (max J (j + 1)), l i k :=
-        Finset.sum_le_sum_of_subset fun x hx =>
-          mem_range.mpr ((mem_range.mp hx).trans_le (le_max_right _ _))
+        Finset.sum_le_sum_of_subset (range_subset_range.mpr (le_max_right _ _))
 
 /-- A single entry of a row is at most that row's sum. -/
 theorem le_rowSum {l : ℕ → ℕ → ℕ} {i : ℕ} (hz : ∃ J, ∀ j, J ≤ j → l i j = 0) (j : ℕ) :
@@ -83,9 +86,12 @@ theorem periodic_mod {a : ℕ} {l : ℕ → ℕ → ℕ} (hp : ∀ i j, l (i + a
   conv_lhs => rw [show i = i % a + a * (i / a) from (Nat.mod_add_div i a).symm]
   exact periodic_add_mul hp _ _ _
 
-/-- A cylinder of volume below `y` has every entry at position `y` or later equal to zero. -/
-theorem eq_zero_of_cylVolume_lt {a y : ℕ} {c : ℕ → ℕ} {l : ℕ → ℕ → ℕ} (ha : 0 < a)
-    (h : IsCylindric a c l) (hy : cylVolume a l < y) {i j : ℕ} (hj : y ≤ j) : l i j = 0 := by
+/-- Small volume confines the entries: an entry of a cylinder at a position that has reached the
+volume is zero. The form with an auxiliary bound `y` — volume `< y` forces vanishing from
+position `y` on — is `(hy.trans_le hj).le` at the call site. -/
+@[hjo "lem_cylinder_entry_bound"]
+theorem eq_zero_of_cylVolume_le {a : ℕ} {c : ℕ → ℕ} {l : ℕ → ℕ → ℕ} (ha : 0 < a)
+    (h : IsCylindric a c l) {i j : ℕ} (hj : cylVolume a l ≤ j) : l i j = 0 := by
   rw [periodic_mod h.periodic]
   by_contra hne
   have h1 := succ_le_rowSum (h.antitone (i % a)) (h.eventually_zero (i % a)) hne
@@ -120,10 +126,12 @@ theorem finite_setOf_cylVolume_lt (a N y : ℕ) (c : ℕ → ℕ) (ha : 0 < a) :
     have e2 := hb₂ (i % a) j
     rw [periodic_mod hc₁.periodic, periodic_mod hc₂.periodic]
     omega
-  · rw [eq_zero_of_cylVolume_lt ha hc₁ hv₁ hjy, eq_zero_of_cylVolume_lt ha hc₂ hv₂ hjy]
+  · rw [eq_zero_of_cylVolume_le ha hc₁ (hv₁.trans_le hjy).le,
+      eq_zero_of_cylVolume_le ha hc₂ (hv₂.trans_le hjy).le]
 
 /-- The bounded cylindric series is a genuine sum: for `0 < a` the family `q^{|λ|}` indexed
-by the cylindric partitions of profile `c` with all entries at most `N` is summable. -/
+by the cylindric partitions of the balanced profile `profile a b` with all entries at most `N`
+is summable. -/
 @[hjo "lem_summable_bounded"]
 theorem summable_boundedGF (a b N : ℕ) (ha : 0 < a) :
     Summable fun l : {l : ℕ → ℕ → ℕ // IsCylindric a (profile a b) l ∧ BoundedBy N l} =>
@@ -136,7 +144,8 @@ theorem summable_boundedGF (a b N : ℕ) (ha : 0 < a) :
   simpa using hu.summable_mul_pow (f := fun _ => (1 : ℤ⟦X⟧)) (q := (X : ℤ⟦X⟧))
 
 /-- The cylindric series is a genuine sum: for `0 < a` the family `q^{|λ|}` indexed by the
-cylindric partitions of profile `c` with no bound on their entries is summable. -/
+cylindric partitions of the balanced profile `profile a b`, with no bound on their entries, is
+summable. -/
 @[hjo "lem_summable_unbounded"]
 theorem summable_unboundedGF (a b : ℕ) (ha : 0 < a) :
     Summable fun l : {l : ℕ → ℕ → ℕ // IsCylindric a (profile a b) l} =>

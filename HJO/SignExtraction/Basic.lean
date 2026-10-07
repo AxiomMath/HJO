@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Algebra.BigOperators.Fin
 public import Mathlib.Algebra.BigOperators.Intervals
-public import HJO.Defs
+public import HJO.Paths.Defs
 public import HJO.SignExtraction.LetterEval
 public import HJO.SignExtraction.Words
 public meta import HJO.Attr
@@ -24,8 +24,8 @@ counts the `S`-ascending words in `m` letters, which is the value of the descent
 The hypothesis `S ⊆ Ico 1 n` is needed and not cosmetic. `gessel` is total in `S`, and for `S`
 outside that range its condition constrains the auxiliary sequence beyond the window a word of
 length `n` occupies -- at `0 ∈ S` it would demand a letter strictly below the first one, which the
-letters being indexed from `0` makes impossible. On the descent sets of the development, which are
-subsets of `{1, …, n-1}`, no such constraint arises and the two descriptions agree.
+letters being indexed from `0` makes impossible. On the descent sets used in this library, which
+are subsets of `{1, …, n-1}`, no such constraint arises and the two descriptions agree.
 -/
 
 @[expose] public section
@@ -54,7 +54,7 @@ theorem coeff_gessel_eq_zero (K : Type*) [CommRing K] {n : ℕ} {S : Finset ℕ}
   rw [MvPowerSeries.coeff_apply, gessel]
   exact Set.indicator_of_notMem h 1
 
-/-- A sum over the positions `1, …, n` of the source is a sum over the `0`-based positions of a
+/-- A sum over the `1`-based positions `1, …, n` is a sum over the `0`-based positions of a
 tuple of length `n`. -/
 theorem sum_Icc_one_eq_sum_fin {M : Type*} [AddCommMonoid M] (g : ℕ → M) : ∀ n : ℕ,
     ∑ j ∈ Icc 1 n, g j = ∑ k : Fin n, g ((k : ℕ) + 1)

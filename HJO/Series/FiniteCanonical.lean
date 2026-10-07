@@ -7,7 +7,7 @@ module
 
 public import QSeriesLib.NumberTheory.QTheory.Basic
 public import QSeriesLib.RingTheory.PowerSeries.Inverse
-public import HJO.Defs
+public import HJO.Definitions
 public import HJO.Series.GapPoset
 
 /-! # The `ℕ`-valued and `ℤ`-valued presentations of the HJO polynomial agree

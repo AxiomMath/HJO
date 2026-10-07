@@ -116,7 +116,8 @@ theorem exists_column_form (hco : a.Coprime b) (ha : 0 < a) {g : ℕ}
     linarith
 
 /-- Membership in `HJO.Gaps.gapDiagram`, with the column bound written `r ≤ a - 1` rather
-than `r < a`, the shape the source uses. -/
+than `r < a`, the shape in which the gap diagram `𝒟` is cut out in
+`HJO/RankOneDinv/Diagram.lean`. -/
 theorem mem_gapDiagram (ha : 0 < a) {p : ℕ × ℕ} :
     p ∈ Gaps.gapDiagram a b ↔ 1 ≤ p.1 ∧ p.1 ≤ a - 1 ∧ 1 ≤ p.2 ∧ a * p.2 < p.1 * b := by
   rw [Gaps.mem_gapDiagram]

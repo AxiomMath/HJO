@@ -11,7 +11,7 @@ public meta import HJO.Attr
 
 /-! # The combinatorial objects of the rank-one dinv identity
 
-The objects the rank-one dinv identity is stated with that the development does not already
+The objects the rank-one dinv identity is stated with that the library does not already
 carry: the diagonal floor `β u = ⌊u * b / a⌋`, the gap diagram `𝒟` of cells `(r, i)` cut out by
 `1 ≤ r ≤ a - 1`, `i ≥ 1` and `r * b - a * i > 0`, and the tail count `E_P(u, v)` of the cells of
 a below-diagonal path whose arm and leg exceed given thresholds.
@@ -22,7 +22,7 @@ divisor `a` is a natural number; `beta_eq_floor` records that reading, `le_beta_
 unfolding, and `beta_natCast` is the bridge to the natural division `b * r / a` in which the
 diagonal already appears in `HJO.Paths.area`. Negative arguments are genuinely used -- the
 reflection `β (-u) = -β u - 1` -- so the argument is an integer while `a` and `b` stay natural,
-as everywhere else in the development.
+as everywhere else in the library.
 
 The gap diagram is a `Finset`, not a `Set`: every consumer counts its subsets. Its cells are
 pairs of naturals, matching `HJO.Paths.hookCount` and `HJO.ReturnPath.cellSet`, so the positive

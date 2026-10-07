@@ -8,7 +8,7 @@ module
 public import QSeriesLib.NumberTheory.QTheory.Defs
 public import QSeriesLib.RingTheory.PowerSeries.DiscreteTopology
 public meta import HJO.Attr
-public import HJO.Defs
+public import HJO.Paths.Defs
 
 /-! # The area polynomial, the rank shifts and the return paths
 
@@ -24,6 +24,43 @@ open Finset PowerSeries
 open scoped PowerSeries.DiscreteTopology QTheory
 
 namespace HJO.Paths
+
+/-- Inside the rectangle the height function reads off the entry of the height vector. -/
+theorem ht_coe {a b N : ℕ} (y : Heights a b N) (r : Fin (a * N + 1)) :
+    ht y (r : ℕ) = (y r : ℕ) :=
+  dite_eq_left r.isLt
+
+/-- Past the right endpoint the height function is held at `bN`. -/
+theorem ht_of_gt {a b N : ℕ} (y : Heights a b N) {r : ℕ} (hr : a * N < r) : ht y r = b * N :=
+  dite_eq_right (by omega)
+
+/-- A height of a candidate `(aN, bN)`-path never exceeds `bN`, the value `bN` held past `aN`
+included. -/
+theorem ht_le_mul {a b N : ℕ} (y : Heights a b N) (r : ℕ) : ht y r ≤ b * N := by
+  rw [ht]
+  split
+  · exact Nat.lt_succ_iff.mp (y _).isLt
+  · exact le_rfl
+
+/-- A height vector whose adjacent heights never come back down has monotone height function.
+This reads only the adjacent-step clause, which `IsBelowDiagonal` and `IsAboveDiagonal` share, and
+it needs no bound on the indices: past the right endpoint the height function is held at its
+maximum `bN`. -/
+theorem ht_mono {a b N : ℕ} {y : Heights a b N} (hmono : ∀ r < a * N, ht y r ≤ ht y (r + 1)) :
+    Monotone (ht y) := by
+  intro r s hrs
+  induction s, hrs using Nat.le_induction with
+  | base => exact le_rfl
+  | succ s hrs ih =>
+    rcases Nat.lt_or_ge s (a * N) with hs | hs
+    · exact ih.trans (hmono s hs)
+    · rw [ht_of_gt y (show a * N < s + 1 by omega)]
+      exact ht_le_mul y r
+
+/-- The heights of a below-diagonal path are monotone. -/
+theorem IsBelowDiagonal.ht_mono {a b N : ℕ} {y : Heights a b N} (hy : IsBelowDiagonal y) :
+    Monotone (ht y) :=
+  _root_.HJO.Paths.ht_mono hy.2.2.1
 
 /-- `A_N(q) = ∑_P q^{area(P)}`, the area generating polynomial of all below-diagonal
 `(aN, bN)`-paths. At `N = 0` the only path is the empty one, so `A_0(q) = 1`. -/

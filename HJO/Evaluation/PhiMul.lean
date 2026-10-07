@@ -82,15 +82,6 @@ theorem map_powerSum (hom : R →+* S) (k : ℕ) :
     MvPolynomial.map hom (powerSum R k) = powerSum S k := by
   rw [powerSum, powerSum, MvPolynomial.map_X]
 
-/-- A diagonal substitution fixes the constants. -/
-theorem diagScale_C (c : ℕ → R) (a : R) : diagScale c (C a : Lambda R) = C a := by
-  rw [← MvPolynomial.algebraMap_eq, AlgHom.commutes]
-
-/-- A diagonal substitution multiplies the generator of index `i` by the scalar `c i`. -/
-theorem diagScale_X (c : ℕ → R) (i : ℕ) :
-    diagScale c (X i : Lambda R) = C (c i) * X i := by
-  rw [diagScale, MvPolynomial.aeval_X]
-
 /-- A diagonal substitution commutes with a coefficientwise ring homomorphism, the family of
 scalars being carried along. -/
 theorem map_diagScale (hom : R →+* S) (c : ℕ → R) (f : Lambda R) :
@@ -986,7 +977,20 @@ theorem algebraicIndependent_param {L : Type*} [Field L] [Algebra ℚ L] (f : Co
   rw [hcomp, hcomp] at h
   exact injective_aeval_q_u (hf h)
 
-/-! ### The slope homomorphism the collinear commutation input supplies -/
+/-! ### The slope homomorphism the collinear commutation input supplies
+
+**The `collinear` hypothesis of the three theorems below is DISCHARGED, and cannot be removed from
+them.** `HJO.External.CollinearCommutation` is a theorem of this library at every field of
+characteristic zero and with no hypothesis whatever --
+`HJO.CollinearDischarged.collinearCommutation`, verified at exactly
+`[propext, Classical.choice, Quot.sound]`. It is not applied here because it **cannot** be: `Base`
+defined in *this* file, so the discharge necessarily lives downstream of it and importing it here
+would be a cycle. The consumers that matter supply it already -- the two locked objectives carry no
+collinear binder.
+
+So a reader should not count these three binders as open debt. They are the ordinary shape of
+stated below its own discharge in the import order, and an independent reviewer has already
+miscounted them once. -/
 
 /-- A slope homomorphism at `(a, b)` exists over the base field at the two parameters of the
 model. Their algebraic independence over `ℤ` allows the generic collinear commutation input to

@@ -2,9 +2,9 @@
     "challenge_module": "Challenge.Basic",
     "solution_module": "Solution.Basic",
     "theorem_names": [
-        "HJO.Cylindric.summable_boundedGF",
-        "HJO.Cylindric.summable_unboundedGF",
-        "HJO.Finite.finite_index",
+        "HJO.Challenge.summable_boundedGF",
+        "HJO.Challenge.summable_unboundedGF",
+        "HJO.Challenge.finite_index",
         "HJO.Challenge.thm_finite",
         "HJO.Challenge.thm_main"
     ],

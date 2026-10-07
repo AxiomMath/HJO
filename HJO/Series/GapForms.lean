@@ -11,11 +11,13 @@ public meta import HJO.Attr
 
 /-! # Further definitions attached to the gap set
 
-This file records five objects of the HJO development that the substrate does not already carry:
-the symmetric bilinear form polarising the quadratic form of the gap set, the cylindric weight,
+This file records six objects attached to the gap set that the base library `QSeriesLib` does not
+already carry:
+the symmetric bilinear form polarising the quadratic form of the gap set, the distance from an
+integer to the multiples of `d`, the cylindric weight,
 the Gaussian binomial coefficient at integer arguments, the layers (superlevel sets) of a vector
 and their multiplicities. It opens with the membership criterion for the semigroup itself, in the
-combination form the development uses.
+combination form the library uses.
 
 The bilinear form takes *half*-integer values -- for a single pair of distinct gaps `g`, `h` with
 `0 ≤ h - g < a` it is `1/2` -- so it is valued in `ℚ`, not `ℤ`; the literature's cross-dinv
@@ -67,6 +69,17 @@ theorem two_mul_bilin (G : Finset ℕ) (a b : ℕ) (x y : G → ℤ) :
       (HJO.U a b ((h : ℕ) - (g : ℕ)) + HJO.U a b ((g : ℕ) - (h : ℕ))) * x g * y h : ℤ) : ℚ) := by
   rw [bilin]
   ring
+
+/-! ### The distance to a multiple of `d` -/
+
+/-- The distance from `x : ℤ` to the multiples of `d`, `dist (x, dℤ) = min_{j ∈ ℤ} |x - dj|`, as a
+natural number. The values `|x - dj|` form a nonempty set of natural numbers (`j = 0` gives `|x|`),
+so this infimum is attained: `Nat.sInf_le` bounds it above by every `|x - dj|` and `Nat.sInf_mem`
+returns a `j` realising it. No hypothesis is put on `d`: at `d = 0` the value is `|x|`, and `d`,
+`-d` give the same value. For `0 < d` it is realised by the least absolute residue
+`(Int.bmod x d).natAbs`, the form `cylWeight` is written in. -/
+@[hjo "def_dist"]
+noncomputable def distMultiples (x d : ℤ) : ℕ := ⨅ j : ℤ, (x - d * j).natAbs
 
 /-! ### The cylindric weight -/
 

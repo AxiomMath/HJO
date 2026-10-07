@@ -16,10 +16,10 @@ letter from the alphabet. This file defines that displacement: the Bernstein dis
 sending `p_k` to `p_k - z⁻ᵏ` and written `f[X - 1/z]` on elements.
 
 Like `Sym.plethShift` and `Sym.plethCreate`, it is written in the variable `w = z⁻¹` rather than
-in the Laurent ring `Λ[z, z⁻¹]` of the source: only non-negative powers of `w` occur in the image
+in the Laurent ring `Λ[z, z⁻¹]`: only non-negative powers of `w` occur in the image
 of a generator, hence in the image of anything, so the target is the honest polynomial ring `Λ[w]`
 and extracting the coefficient of a power of `z` from a product with a power series in `z` stays a
-finite sum. The inclusion `ι : Λ → Λ[w]` of the source is `Polynomial.C`.
+finite sum. The inclusion `ι : Λ → Λ[w]` is `Polynomial.C`.
 
 Since `Lambda K` is the polynomial algebra on the generators `p_1, p_2, …` -- generator `i` of
 `MvPolynomial ℕ K` standing for `p_{i+1}` -- prescribing the images of the `p_k` determines an

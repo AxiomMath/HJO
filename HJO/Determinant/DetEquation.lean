@@ -35,12 +35,11 @@ Three further ingredients turn that into a `q`-difference equation for the deter
   counting its up-edges, a walk from a path by tracking the vertex `bx - ay`, and the weight of a
   walk is `q` to the area of its path. At smaller `H` the walks are only a proper part of the
   paths of height at most `H`, so the identification is available only from that bound on.
-* *The equation.* Combining these with Cramer's rule gives `𝒟_{H+1}(z;q) 𝒲_{H+1}(z;q)
-  = 𝒟_H(qz;q)`, where `𝒲_H` generates the closed walks; the determinant is supported in
-  `s`-degrees divisible by `d`, which is what makes the product of the two series in `z` the
-  right regrouping. Letting `H → ∞` and using that each `z`-coefficient of `𝒲_H` is eventually
-  the area polynomial yields `𝒟(qz;q) = 𝒜(z;q) 𝒟(z;q)`, hence that `𝒟(-z;q)` solves the common
-  equation.
+* *The equation.* Combining these with Cramer's rule gives `𝒟_{H+1}(z;q) 𝒲_{H+1}(z;q) = 𝒟_H(qz;q)`,
+  where `𝒲_H` generates the closed walks; the determinant is supported in `s`-degrees divisible by
+  `d`, which is what makes the product of the two series in `z` the right regrouping. Letting
+  `H → ∞` and using that each `z`-coefficient of `𝒲_H` is eventually the area polynomial yields
+  `𝒟(qz;q) = 𝒜(z;q) 𝒟(z;q)`, hence that `𝒟(-z;q)` solves the common equation.
 -/
 
 @[expose] public section

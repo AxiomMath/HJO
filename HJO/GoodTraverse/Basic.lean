@@ -20,21 +20,21 @@ structural input is that at a gap `g` the upper shift `g + b` leaves `G` exactly
 `L = HJO.Defs.boundaryLength a b`. Along that chain the boundary factors telescope, the interior
 factors match under the `b`-shift, and the lower boundary factors are `1`.
 
-The ambient ring is `ℤ⟦X⟧` with `q = X`, as everywhere in this development, rather than the
-source's field `ℚ(q)`: the `q`-factorial `(q)_k = (X; X)_k` has constant term `1`, so it is a
-unit, and the source's division by it is multiplication by `PowerSeries.invOfUnit`. That the
-`q`-factorial is nonzero -- the source's reason for being allowed to divide -- is
+The ambient ring is `ℤ⟦X⟧` with `q = X`, as everywhere in this library, rather than the field
+`ℚ(q)` in which the identity is usually stated: the `q`-factorial `(q)_k = (X; X)_k` has constant
+term `1`, so it is a unit, and division by it is multiplication by `PowerSeries.invOfUnit`. That
+the `q`-factorial is nonzero -- the reason one may divide by it in `ℚ(q)` -- is
 `qPochhammer_ne_zero`, and the two-sided inverse property is
 `HJO.ReturnPathSolves.qPochhammer_mul_inv`.
 
 Indices are natural numbers and the differences of coordinates appearing in them are truncated
-subtractions, as in `HJO.multiplicand` and `HJO.Gaps.flag`. Under the source's hypotheses --
-`𝐧` in the monotonicity cone with `n_f ≤ N` -- no truncation occurs, since every difference the
-source writes is then nonnegative; the lemmas proving that are `extend_sub_le`,
-`extend_le_frobenius` and `le_flag_add`. Because the truncated readings agree with the source's
-there, the product identities `prod_upperBoundary_telescope`, `prod_interior_match` and
+subtractions, as in `HJO.multiplicand` and `HJO.Gaps.flag`. Under the hypotheses of the identity
+-- `𝐧` in the monotonicity cone with `n_f ≤ N` -- no truncation occurs, since every difference
+appearing in it is then nonnegative; the lemmas proving that are `extend_sub_le`,
+`extend_le_frobenius` and `le_flag_add`. Because the truncated readings agree with the untruncated
+ones there, the product identities `prod_upperBoundary_telescope`, `prod_interior_match` and
 `reduced_traverse` need no cone hypothesis at all: off the cone the truncation is exactly the
-source's convention that a `q`-factorial at a negative index contributes nothing new to the
+usual convention that a `q`-factorial at a negative index contributes nothing new to the
 identity, and the proofs are the same reindexings.
 -/
 
@@ -47,7 +47,7 @@ namespace HJO.GoodTraverse
 
 /-! ### The `q`-factorial and telescoping products -/
 
-/-- The `q`-factorial `(q)_k = (X; X)_k` is nonzero: its constant term is `1`. In the source this
+/-- The `q`-factorial `(q)_k = (X; X)_k` is nonzero: its constant term is `1`. Over `ℚ(q)` this
 is what licenses dividing by it; here the stronger statement that it is a unit is
 `HJO.ReturnPathSolves.qPochhammer_mul_inv`. -/
 @[hjo "lem_qfac_ne_zero"]
@@ -69,8 +69,8 @@ theorem prod_mul_inv_telescope {M : Type*} [CommMonoid M] {c d : ℕ → M} {L :
       _ = c (L + 1 + 1) * d 0 := by rw [h (L + 1) (by omega), one_mul]
 
 /-- Telescoping a product of ratios of nonzero field elements: for `c₀, …, c_{M+1}` nonzero,
-`∏_{j=0}^{M} c_{j+1} / c_j = c_{M+1} / c_0`. This is the source's statement, in the field
-`ℚ(q)`; the development consumes the `ℤ⟦X⟧` form `prod_mul_inv_telescope`. -/
+`∏_{j=0}^{M} c_{j+1} / c_j = c_{M+1} / c_0`. This is the statement over the field `ℚ(q)`; the
+library uses the `ℤ⟦X⟧` form `prod_mul_inv_telescope`. -/
 @[hjo "lem_telescope"]
 theorem prod_div_telescope {K : Type*} [Field K] {c : ℕ → K} {M : ℕ}
     (hc : ∀ j ≤ M + 1, c j ≠ 0) :

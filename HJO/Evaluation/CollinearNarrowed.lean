@@ -39,6 +39,7 @@ variable {L : Type*} [CommRing L] {q u : L}
 
 /-- The product of two algebraically independent parameters is nonzero: otherwise the product of
 the two variables would be the zero polynomial, which it is not at `(1, 1)`. -/
+@[hjo "lem_generic_v_ne_zero"]
 theorem mul_ne_zero_of_algebraicIndependent (hqu : AlgebraicIndependent ℤ ![q, u]) :
     q * u ≠ 0 := fun h => by
   have h0 : (MvPolynomial.X 0 * MvPolynomial.X 1 : MvPolynomial (Fin 2) ℤ) = 0 :=
@@ -48,6 +49,7 @@ theorem mul_ne_zero_of_algebraicIndependent (hqu : AlgebraicIndependent ℤ ![q,
 
 /-- The product of two algebraically independent parameters is not a root of unity: otherwise a
 positive power of the product of the two variables would be `1`, which it is not at `(0, 0)`. -/
+@[hjo "lem_generic_v_not_root_of_unity"]
 theorem pow_succ_ne_one_of_algebraicIndependent (hqu : AlgebraicIndependent ℤ ![q, u]) (j : ℕ) :
     (q * u) ^ (j + 1) ≠ 1 := fun h => by
   have h0 : (MvPolynomial.X 0 * MvPolynomial.X 1 : MvPolynomial (Fin 2) ℤ) ^ (j + 1) = 1 :=
@@ -58,10 +60,10 @@ theorem pow_succ_ne_one_of_algebraicIndependent (hqu : AlgebraicIndependent ℤ 
 /-! ### The narrowed input -/
 
 /-- **Bergeron–Garsia–Leven–Xin, `Compositional (km,kn)-shuffle conjectures`, Theorem 5.1**: the
-collinear slope operators `Q_{ka, kb}`, `k ≥ 1`, pairwise commute. This is the whole of what the
-source supplies, and it is `HJO.External.CollinearCommutation` without its second conjunct: the
-genericity hypothesis is kept because the source works at generic parameters, but the existence of
-a slope homomorphism is no longer asked for. -/
+collinear slope operators `Q_{ka, kb}`, `k ≥ 1`, pairwise commute. This is the whole of what that
+theorem supplies, and it is `HJO.External.CollinearCommutation` without its second conjunct: the
+genericity hypothesis is kept because Bergeron–Garsia–Leven–Xin work at generic parameters, but the
+existence of a slope homomorphism is not asked for. -/
 @[hjo "lem_collinear_commute"]
 def CollinearCommute (L : Type*) [Field L] [Algebra ℚ L] : Prop :=
   ∀ a b : ℕ, Nat.Coprime a b → 1 < a → a < b →

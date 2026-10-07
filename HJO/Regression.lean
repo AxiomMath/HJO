@@ -10,7 +10,7 @@ public import HJO.Symmetric.EpsilonSelection
 
 /-! # Identities pinning down the conventions of the definitions
 
-Several of this development's definitions are fixed by a convention — a choice of split, a sign,
+Several of this library's definitions are fixed by a convention — a choice of split, a sign,
 a virtual rather than a monomial substitution — that a variant of the definition would change
 without changing any type: the variant elaborates, every consumer of it elaborates, and it names
 a different mathematical object. This file computes the values those conventions force, inside
@@ -23,13 +23,13 @@ else in the library depends on them.
 
 The five conventions pinned, in the order they appear:
 
-* **The split.** `Sym.Split` is a bounded search with a totalising default `(1, 0)`, and the
-  default is reached at inputs where the source's split is something else. `primitiveSplit`
-  makes both boundary values explicit: the raw search is wrong at first coordinate `1` and
-  second coordinate at least `2`, but its fallback is correct at second coordinate `1`.
-  `slopeSplit` splits the *primitive* pair rather than the multiplied one. Section 1 pins the
-  boundary values and `Split 4 6 = (1, 0)` — a true fact about `Split` and the reason `Qop` must
-  not call it at a noncoprime slope.
+* **The split.** `Sym.Split` is a bounded search with a totalising default `(1, 0)`, and the default
+  is reached at inputs where the split the recursion calls for is something else. `primitiveSplit`
+  makes both boundary values explicit: the raw search is wrong at first coordinate `1` and second
+  coordinate at least `2`, but its fallback is correct at second coordinate `1`. `slopeSplit` splits
+  the *primitive* pair rather than the multiplied one. Section 1 pins the boundary values and
+  `Split 4 6 = (1, 0)` — a true fact about `Split` and the reason `Qop` must not call it at a
+  noncoprime slope.
 * **The recursion at a noncoprime slope.** Section 2 evaluates the bracket that `Qop` unfolds to
   at the first three noncoprime slopes and at the base case, in a general field.
 * **The axis plethysm.** `Sym.axisGen` substitutes a *virtual* alphabet, so the scalar attached
@@ -58,18 +58,18 @@ open MvPolynomial
 `(2k, 3k)`, so if it moves, every one of those slopes recurses on the wrong pair of halves. -/
 theorem primitiveSplit_two_three : Sym.primitiveSplit 2 3 = (1, 1) := by decide
 
-/-- **The BGLX (2.9) boundary at a COPRIME pair, which the raw search gets wrong.** At `a = 1`
-the search of `Sym.Split 1 b` filters on `1 ≤ p.1` with `p.1 ∈ List.range 1 = [0]`, so it finds
-nothing and falls through to its default `(1, 0)` — even though `(1, 3)` is coprime and the
-source's split there is `(1, b - 1) = (1, 2)`. `Sym.primitiveSplit` writes this value out
-in its `a = 1` branch. If this breaks, `Sym.Qop q u 2 6` silently recurses on `(1, 6)` and `(1, 0)`
+/-- **The BGLX (2.9) boundary at a COPRIME pair, which the raw search gets wrong.** At `a = 1` the
+search of `Sym.Split 1 b` filters on `1 ≤ p.1` with `p.1 ∈ List.range 1 = [0]`, so it finds nothing
+and falls through to its default `(1, 0)` — even though `(1, 3)` is coprime and the split the
+recursion calls for there is `(1, b - 1) = (1, 2)`. `Sym.primitiveSplit` writes this value out in
+its `a = 1` branch. If this breaks, `Sym.Qop q u 2 6` silently recurses on `(1, 6)` and `(1, 0)`
 instead of `(1, 4)` and `(1, 2)`, which is a different operator. -/
 theorem primitiveSplit_one_three : Sym.primitiveSplit 1 3 = (1, 2) := by decide
 
-/-- The other written-out boundary: at `b = 1 < a` the source's split is `(1, 0)`, the pair
-naming the boundary operator `Q_{1,0} = D_0`. Here `Sym.primitiveSplit` and the raw search agree,
-but they agree for different reasons — the former *asserts* `(1, 0)` and the search *defaults* to
-it — so the pin is on `Sym.primitiveSplit`. -/
+/-- The other written-out boundary: at `b = 1 < a` the split the recursion calls for is `(1, 0)`,
+the pair naming the boundary operator `Q_{1,0} = D_0`. Here `Sym.primitiveSplit` and the raw search
+agree, but they agree for different reasons — the former *asserts* `(1, 0)` and the search
+*defaults* to it — so the pin is on `Sym.primitiveSplit`. -/
 theorem primitiveSplit_two_one : Sym.primitiveSplit 2 1 = (1, 0) := by decide
 
 /-- `Sym.slopeSplit` splits the primitive pair: `(4, 6)` has multiplicity `2` and primitive pair
@@ -82,14 +82,14 @@ theorem slopeSplit_four_six : Sym.slopeSplit 4 6 = (1, 1) := by decide
 `4 * s + 1 = 6 * r` has odd left side and even right side, so it has no solution at all and
 `Sym.Split 4 6` falls through to its default `(1, 0)`. That is a correct fact about `Split`,
 which is totalised on purpose; it is a *wrong* split of `(4, 6)`, and taking it would make
-`Sym.Qop q u 4 6` the bracket `[Q_{3,6}, Q_{1,0}]` rather than the source's
+`Sym.Qop q u 4 6` the bracket `[Q_{3,6}, Q_{1,0}]` rather than the intended
 `[Q_{3,5}, Q_{1,1}]`. This is the identity that must keep holding for `slopeSplit` to be
 necessary: if `Split 4 6` ever starts returning `(1, 1)` by itself, the reader will conclude
 `slopeSplit` is redundant and delete it, and the boundary case `primitiveSplit 1 3` above will
 break with it. -/
 theorem split_four_six : Sym.Split 4 6 = (1, 0) := by decide
 
-/-! ### 2. The source's recursion at the first noncoprime slopes -/
+/-! ### 2. The recursion at the first noncoprime slopes -/
 
 section Qop
 
@@ -148,7 +148,7 @@ end Qop
 
 /-! ### 3. The linear coefficient of an axis generator -/
 
-/-- **The paper's value for the linear coefficient of `U_2` at `v = 6`, over `ℚ`.** The axis
+/-- **The intended value for the linear coefficient of `U_2` at `v = 6`, over `ℚ`.** The axis
 generator substitutes the *virtual* alphabet `(1 - v) / v * X`, whose power sums are the
 difference `p_k[v⁻¹ X] - p_k[X] = (v ^ (-k) - 1) * p_k`. So the coefficient of `p_2` in `U_2` is
 `v / (v - 1) * ((v ^ (-2)) - 1) / 2`, which at `v = 6` is `6/5 * (1/36 - 1) / 2 = -7/12`.
@@ -196,8 +196,10 @@ theorem qop_eq_zero_at_one {L : Type*} [Field L] [Algebra ℚ L] (q : L) {m : �
 `(aN + 1) * (a * y - b * x) + x`, and it *increases* up a column — which is what makes the
 rank-ordered labelling of a path a legal parking labelling.
 
-The competing convention `b * x - a * y` follows the paper's hook-count display rather than the
-paper's own assertion that the rank increases up a column; the two are incompatible. Under
+The competing convention `b * x - a * y` follows the vertex rank `bx - ay` of the hook-count
+discussion in §3.3 (A running example and the cross-block count) of *Rogers-Ramanujan identities
+from the geometry of `X^a = Y^b`*, rather than that paper's assertion in §4.2 (The compositional
+theorem and sign extraction) that the rank increases up a column; the two are incompatible. Under
 `b * x - a * y` the rank-ordered labelling of a path is no longer a parking labelling, and at
 `(a, b, N) = (2, 3, 1)` no parking function then has full `ides`, so the sign-extracted sum over
 the selected parking functions is `0` instead of `q + u`. A concrete pin is worth more than the
@@ -218,9 +220,10 @@ theorem pointRank_strictMono_up_column {a b N : ℕ} (ha : 0 < a) (x : ℕ) {s t
 /-- **What the `+ x` perturbation buys.** The lattice points `(0, 0)` and `(2, 3)` of the
 `2 × 3` rectangle have the *same* integral rank `a * y - b * x = 0`, so without the perturbation
 their ranks tie and the rank order fails to be a total order on the north steps. With it they
-are separated, by their horizontal positions, in the direction the source's perturbation
-`x / (aN + 1)` points. Deleting the `+ x` — the obvious "simplification", since the integral
-part carries all the geometry — would make this false and reinstate the tie. -/
+are separated, by their horizontal positions, in the direction the perturbation `x / (aN + 1)` of
+the rank `R_i` in §4.2 of *Rogers-Ramanujan identities from the geometry of `X^a = Y^b`* points.
+Deleting the `+ x` — the obvious "simplification", since the integral part carries all the
+geometry — would make this false and reinstate the tie. -/
 theorem pointRank_perturbation_breaks_tie :
     (2 * 0 - 3 * 0 : ℤ) = (2 * 3 - 3 * 2 : ℤ) ∧
       ParkingFunctions.pointRank 2 3 1 0 0 < ParkingFunctions.pointRank 2 3 1 2 3 := by
